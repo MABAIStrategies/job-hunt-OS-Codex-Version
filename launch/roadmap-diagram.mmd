@@ -1,0 +1,17 @@
+flowchart LR
+    stageOne["Stage 1: Codex-native operating package"]
+    stageTwo["Stage 2: Local workflow runner"]
+    stageThree["Stage 3: Team pilot"]
+    stageFour["Stage 4: Hosted SaaS foundation"]
+    stageFive["Stage 5: Production launch"]
+
+    stageOne --> stageTwo
+    stageTwo --> stageThree
+    stageThree --> stageFour
+    stageFour --> stageFive
+
+    stageOne --> skill["Skill, schemas, templates, launch assets"]
+    stageTwo --> runner["CLI, local database, PDF pipeline"]
+    stageThree --> pilot["Staffing-stack pilot and outcome reporting"]
+    stageFour --> saas["Neon Postgres, OAuth, Stripe, audit logs"]
+    stageFive --> market["Sales enablement, onboarding, support"]

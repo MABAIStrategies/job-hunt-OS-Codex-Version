@@ -1,0 +1,37 @@
+{
+  "job_id": "example-001",
+  "date_added": "2026-05-29",
+  "source_type": "url",
+  "source_url": "https://example.com/jobs/001",
+  "company": "Example Co",
+  "title": "Director of AI Operations",
+  "location": "Philadelphia, PA",
+  "work_mode": "hybrid",
+  "current_status": "package generated",
+  "direct_apply_url": "https://example.com/apply/001",
+  "easy_apply_flag": false,
+  "compensation": {
+    "base_low": 155000,
+    "base_high": 180000,
+    "total_low": 170000,
+    "total_high": 225000,
+    "confidence": "medium"
+  },
+  "contacts": {
+    "recruiter_name": null,
+    "recruiter_contact": null,
+    "hiring_manager_name": null,
+    "hiring_manager_contact": null,
+    "peer_targets": []
+  },
+  "application_date": null,
+  "last_contact_date": null,
+  "next_follow_up_date": "2026-05-30",
+  "response_flag": false,
+  "interview_stage": null,
+  "mock_score": 84,
+  "knowledge_gap_summary": "Add stronger proof of enterprise rollout scale.",
+  "generated_resume_path": "outputs/example_resume.pdf",
+  "generated_cover_letter_path": "outputs/example_cover_letter.pdf",
+  "notes": "Sample dashboard record."
+}

@@ -1,0 +1,5 @@
+tier,setup_fee_usd,monthly_subscription_usd,included_users,included_resume_upgrades,included_applications,ideal_customer_profile,notes
+Pilot,2500,750,3,100,150,Small staffing or career-services pilot,Use for proof-of-value with one pod or cohort
+Team,7500,2500,10,500,750,Staffing team standardizing application support,Best default for agency team rollout
+Growth/RPO,15000,6500,30,2000,3000,RPO or outplacement team running multiple programs,Use when reporting and throughput matter
+Enterprise,35000,15000,custom,custom,custom,Enterprise staffing platform or university system,Custom security review and integration terms

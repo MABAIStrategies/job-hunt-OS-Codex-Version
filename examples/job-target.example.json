@@ -1,0 +1,19 @@
+{
+  "source_type": "url",
+  "source_url": "https://example.com/jobs/001",
+  "company": "Example Co",
+  "title": "Director of AI Operations",
+  "industry": "SaaS",
+  "location": "Philadelphia, PA",
+  "work_mode": "hybrid",
+  "seniority_level": "director",
+  "required_skills": ["AI workflow design", "operations leadership", "stakeholder management"],
+  "preferred_skills": ["sales process automation", "analytics"],
+  "key_responsibilities": ["Build AI-assisted operations workflows", "Improve application throughput"],
+  "culture_signals": ["operator mindset", "cross-functional execution"],
+  "ats_keywords": ["AI operations", "process automation", "dashboard reporting"],
+  "application_method": "direct company site",
+  "direct_apply_url": "https://example.com/apply/001",
+  "req_number": "REQ-001",
+  "confidence": "medium"
+}

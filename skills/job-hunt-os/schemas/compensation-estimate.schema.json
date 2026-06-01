@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/compensation-estimate.schema.json",
+  "title": "CompensationEstimate",
+  "type": "object",
+  "required": ["quick_answer", "base_range", "total_comp_range", "confidence"],
+  "properties": {
+    "quick_answer": { "type": "string" },
+    "base_range": { "$ref": "#/$defs/moneyRange" },
+    "bonus_range": { "$ref": "#/$defs/moneyRange" },
+    "other_comp_range": { "$ref": "#/$defs/moneyRange" },
+    "total_cash_range": { "$ref": "#/$defs/moneyRange" },
+    "total_comp_range": { "$ref": "#/$defs/moneyRange" },
+    "scenarios": { "type": "array", "items": { "type": "object" } },
+    "percentiles": { "type": "object" },
+    "pay_factors": { "type": "array", "items": { "type": "string" } },
+    "negotiation_guidance": { "type": "string" },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+    "next_steps": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "moneyRange": {
+      "type": "object",
+      "required": ["low", "high"],
+      "properties": {
+        "low": { "type": ["number", "null"] },
+        "high": { "type": ["number", "null"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "asset_id": "linkedin-feed-banner",
+  "platform": "linkedin",
+  "format": "png",
+  "width": 1200,
+  "height": 627,
+  "source": "Figma editable frame",
+  "safe_area_notes": "Verify current LinkedIn feed image crop before export.",
+  "verification_status": "needs current platform spec check"
+}

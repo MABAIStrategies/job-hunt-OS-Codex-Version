@@ -1,0 +1,18 @@
+{
+  "quick_answer": "Most likely total annual compensation is 185000 to 215000 dollars.",
+  "base_range": { "low": 155000, "high": 180000 },
+  "bonus_range": { "low": 15000, "high": 25000 },
+  "other_comp_range": { "low": 0, "high": 20000 },
+  "total_cash_range": { "low": 170000, "high": 205000 },
+  "total_comp_range": { "low": 170000, "high": 225000 },
+  "scenarios": [
+    { "name": "Conservative", "total": 170000 },
+    { "name": "Typical", "total": 195000 },
+    { "name": "Stretch", "total": 225000 }
+  ],
+  "percentiles": { "p25": 170000, "median": 195000, "p75": 225000 },
+  "pay_factors": ["director level", "AI operations scope", "hybrid location", "SaaS market", "team ownership"],
+  "negotiation_guidance": "Anchor at 180000 base and 215000 total compensation if evidence supports director scope.",
+  "confidence": "medium",
+  "next_steps": ["Verify posted salary range", "Compare against peer roles", "Confirm bonus and equity policy"]
+}

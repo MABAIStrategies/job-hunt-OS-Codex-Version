@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/pricing-matrix.schema.json",
+  "title": "PricingMatrix",
+  "type": "object",
+  "required": ["currency", "tiers"],
+  "properties": {
+    "currency": { "type": "string" },
+    "tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tier", "setup_fee_usd", "monthly_subscription_usd", "ideal_customer_profile"],
+        "properties": {
+          "tier": { "type": "string" },
+          "setup_fee_usd": { "type": ["number", "string"] },
+          "monthly_subscription_usd": { "type": ["number", "string"] },
+          "included_users": { "type": ["number", "string"] },
+          "included_resume_upgrades": { "type": ["number", "string"] },
+          "included_applications": { "type": ["number", "string"] },
+          "ideal_customer_profile": { "type": "string" }
+        }
+      }
+    }
+  }
+}

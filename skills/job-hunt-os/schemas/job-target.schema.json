@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/job-target.schema.json",
+  "title": "JobTarget",
+  "type": "object",
+  "required": ["source_type", "company", "title", "application_method", "confidence"],
+  "properties": {
+    "source_type": { "type": "string", "enum": ["url", "screenshot", "pasted_description", "title_only"] },
+    "source_url": { "type": ["string", "null"] },
+    "company": { "type": "string" },
+    "title": { "type": "string" },
+    "industry": { "type": ["string", "null"] },
+    "location": { "type": ["string", "null"] },
+    "work_mode": { "type": ["string", "null"], "enum": ["onsite", "hybrid", "remote", "unknown", null] },
+    "seniority_level": { "type": ["string", "null"] },
+    "required_skills": { "type": "array", "items": { "type": "string" } },
+    "preferred_skills": { "type": "array", "items": { "type": "string" } },
+    "key_responsibilities": { "type": "array", "items": { "type": "string" } },
+    "culture_signals": { "type": "array", "items": { "type": "string" } },
+    "ats_keywords": { "type": "array", "items": { "type": "string" } },
+    "application_method": { "type": "string" },
+    "direct_apply_url": { "type": ["string", "null"] },
+    "req_number": { "type": ["string", "null"] },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"] }
+  }
+}

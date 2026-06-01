@@ -1,0 +1,32 @@
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Generated local outputs
+outputs/
+dist/
+build/
+tmp/
+temp/
+
+# Editor and OS state
+.idea/
+.vscode/
+*.swp
+*.swo

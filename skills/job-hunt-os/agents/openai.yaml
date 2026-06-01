@@ -1,0 +1,6 @@
+interface:
+  display_name: "Job Hunt OS"
+  short_description: "Complete job-search application engine"
+  default_prompt: "Use $job-hunt-os to turn this job opportunity into a complete application package and tracking record."
+policy:
+  allow_implicit_invocation: true

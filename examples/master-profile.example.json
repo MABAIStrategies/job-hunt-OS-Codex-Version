@@ -1,0 +1,27 @@
+{
+  "user": {
+    "name": "Mark Bockrath",
+    "location": "Philadelphia, PA",
+    "timezone": "America/New_York",
+    "email": null,
+    "phone": null,
+    "linkedin": null,
+    "voice_brand": ["commercially fluent", "AI-forward", "practical", "confident", "operator-minded"],
+    "defaults": {
+      "resume_output_format": "pdf",
+      "cover_letter_output_format": "pdf"
+    }
+  },
+  "truth_constraints": {
+    "preserve_tenure": true,
+    "preserve_employers": true,
+    "preserve_role_order": true,
+    "preserve_dates": true
+  },
+  "source_materials": {
+    "master_resume": true,
+    "resume_variants": true,
+    "approved_accomplishments": true,
+    "headshot_required": true
+  }
+}

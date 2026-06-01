@@ -1,0 +1,78 @@
+{
+  "project": "Job Hunt OS Launch",
+  "owner": "MAB AI Strategies",
+  "source": {
+    "release_banner": "Figma editable frame",
+    "release_banner_figma_url": "https://www.figma.com/design/ZjauCFEtXetsVeZ99xO8PL",
+    "roadmap": "FigJam or Mermaid source in launch/roadmap-diagram.mmd",
+    "roadmap_figjam_url": "https://www.figma.com/board/ZfiknyHOoM1UVewItluCrs?utm_source=chatgpt&utm_content=edit_in_figjam&oai_id=&request_id=0df16b61-03d6-4063-ad68-578b21c398e5"
+  },
+  "verification_required": true,
+  "verification_note": "Dimensions below are starter export targets. Verify current platform dimensions, safe areas, and crop behavior before final export.",
+  "assets": [
+    {
+      "asset_id": "x-twitter-feed",
+      "platform": "x-twitter",
+      "format": "png",
+      "width": 1600,
+      "height": 900,
+      "safe_area_notes": "Keep headline and CTA centered; verify current feed crop before export."
+    },
+    {
+      "asset_id": "linkedin-feed",
+      "platform": "linkedin",
+      "format": "png",
+      "width": 1200,
+      "height": 627,
+      "safe_area_notes": "Use for feed share; verify current recommended ratio before export."
+    },
+    {
+      "asset_id": "facebook-feed",
+      "platform": "facebook",
+      "format": "png",
+      "width": 1200,
+      "height": 630,
+      "safe_area_notes": "Keep text away from edges; verify current feed crop before export."
+    },
+    {
+      "asset_id": "pinterest-pin",
+      "platform": "pinterest",
+      "format": "png",
+      "width": 1000,
+      "height": 1500,
+      "safe_area_notes": "Vertical pin layout; verify current pin guidance before export."
+    },
+    {
+      "asset_id": "youtube-shorts-cover",
+      "platform": "youtube-shorts",
+      "format": "png",
+      "width": 1080,
+      "height": 1920,
+      "safe_area_notes": "Vertical cover frame; verify Shorts title and UI overlay safe areas."
+    },
+    {
+      "asset_id": "tiktok-cover",
+      "platform": "tiktok",
+      "format": "png",
+      "width": 1080,
+      "height": 1920,
+      "safe_area_notes": "Vertical cover frame; verify profile and caption overlays before export."
+    },
+    {
+      "asset_id": "instagram-feed",
+      "platform": "instagram",
+      "format": "png",
+      "width": 1080,
+      "height": 1350,
+      "safe_area_notes": "Portrait feed frame; verify current crop and safe zones before export."
+    },
+    {
+      "asset_id": "instagram-story",
+      "platform": "instagram",
+      "format": "png",
+      "width": 1080,
+      "height": 1920,
+      "safe_area_notes": "Story frame; verify top and bottom UI overlay safe zones before export."
+    }
+  ]
+}

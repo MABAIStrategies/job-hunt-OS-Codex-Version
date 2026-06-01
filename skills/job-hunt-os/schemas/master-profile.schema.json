@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/master-profile.schema.json",
+  "title": "MasterProfile",
+  "type": "object",
+  "required": ["user", "truth_constraints", "source_materials"],
+  "properties": {
+    "user": {
+      "type": "object",
+      "required": ["name", "location", "timezone", "voice_brand", "defaults"],
+      "properties": {
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "timezone": { "type": "string" },
+        "email": { "type": ["string", "null"] },
+        "phone": { "type": ["string", "null"] },
+        "linkedin": { "type": ["string", "null"] },
+        "voice_brand": { "type": "array", "items": { "type": "string" } },
+        "defaults": {
+          "type": "object",
+          "required": ["resume_output_format", "cover_letter_output_format"],
+          "properties": {
+            "resume_output_format": { "type": "string" },
+            "cover_letter_output_format": { "type": "string" }
+          }
+        }
+      }
+    },
+    "truth_constraints": {
+      "type": "object",
+      "required": ["preserve_tenure", "preserve_employers", "preserve_role_order", "preserve_dates"],
+      "properties": {
+        "preserve_tenure": { "type": "boolean" },
+        "preserve_employers": { "type": "boolean" },
+        "preserve_role_order": { "type": "boolean" },
+        "preserve_dates": { "type": "boolean" }
+      }
+    },
+    "source_materials": {
+      "type": "object",
+      "properties": {
+        "master_resume": { "type": "boolean" },
+        "resume_variants": { "type": "boolean" },
+        "approved_accomplishments": { "type": "boolean" },
+        "headshot_required": { "type": "boolean" }
+      }
+    }
+  }
+}

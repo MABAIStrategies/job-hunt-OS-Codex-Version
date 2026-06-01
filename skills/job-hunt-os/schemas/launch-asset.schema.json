@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/launch-asset.schema.json",
+  "title": "LaunchAsset",
+  "type": "object",
+  "required": ["asset_id", "platform", "format", "width", "height", "source"],
+  "properties": {
+    "asset_id": { "type": "string" },
+    "platform": { "type": "string" },
+    "format": { "type": "string" },
+    "width": { "type": "integer" },
+    "height": { "type": "integer" },
+    "source": { "type": "string" },
+    "safe_area_notes": { "type": ["string", "null"] },
+    "verification_status": { "type": "string" }
+  }
+}

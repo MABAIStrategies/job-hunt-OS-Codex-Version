@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/application-package.schema.json",
+  "title": "ApplicationPackage",
+  "type": "object",
+  "required": ["job_id", "candidate_name", "company", "title", "assets", "dashboard_record"],
+  "properties": {
+    "job_id": { "type": "string" },
+    "candidate_name": { "type": "string" },
+    "company": { "type": "string" },
+    "title": { "type": "string" },
+    "assets": {
+      "type": "object",
+      "required": ["resume_pdf", "cover_letter_pdf"],
+      "properties": {
+        "resume_pdf": { "type": ["string", "null"] },
+        "cover_letter_pdf": { "type": ["string", "null"] },
+        "ats_text": { "type": ["string", "null"] },
+        "interview_prep_pdf": { "type": ["string", "null"] },
+        "knowledge_gap_pdf": { "type": ["string", "null"] }
+      }
+    },
+    "ats_analysis": { "type": "object" },
+    "compensation": { "$ref": "compensation-estimate.schema.json" },
+    "follow_up": { "$ref": "outreach-sequence.schema.json" },
+    "dashboard_record": { "$ref": "dashboard-record.schema.json" }
+  }
+}

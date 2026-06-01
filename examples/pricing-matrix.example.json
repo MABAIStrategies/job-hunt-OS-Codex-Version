@@ -1,0 +1,41 @@
+{
+  "currency": "USD",
+  "tiers": [
+    {
+      "tier": "Pilot",
+      "setup_fee_usd": 2500,
+      "monthly_subscription_usd": 750,
+      "included_users": 3,
+      "included_resume_upgrades": 100,
+      "included_applications": 150,
+      "ideal_customer_profile": "Small staffing or career-services pilot"
+    },
+    {
+      "tier": "Team",
+      "setup_fee_usd": 7500,
+      "monthly_subscription_usd": 2500,
+      "included_users": 10,
+      "included_resume_upgrades": 500,
+      "included_applications": 750,
+      "ideal_customer_profile": "Staffing team standardizing application support"
+    },
+    {
+      "tier": "Growth/RPO",
+      "setup_fee_usd": 15000,
+      "monthly_subscription_usd": 6500,
+      "included_users": 30,
+      "included_resume_upgrades": 2000,
+      "included_applications": 3000,
+      "ideal_customer_profile": "RPO or outplacement team running multiple programs"
+    },
+    {
+      "tier": "Enterprise",
+      "setup_fee_usd": 35000,
+      "monthly_subscription_usd": 15000,
+      "included_users": "custom",
+      "included_resume_upgrades": "custom",
+      "included_applications": "custom",
+      "ideal_customer_profile": "Enterprise staffing platform or university system"
+    }
+  ]
+}

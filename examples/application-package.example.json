@@ -1,0 +1,36 @@
+{
+  "job_id": "example-001",
+  "candidate_name": "Mark Bockrath",
+  "company": "Example Co",
+  "title": "Director of AI Operations",
+  "assets": {
+    "resume_pdf": "outputs/example_resume.pdf",
+    "cover_letter_pdf": "outputs/example_cover_letter.pdf",
+    "ats_text": "outputs/example_resume_ats.txt",
+    "interview_prep_pdf": null,
+    "knowledge_gap_pdf": null
+  },
+  "ats_analysis": {
+    "current_match": 54,
+    "projected_match": 84,
+    "critical_missing_terms": ["AI operations", "workflow governance"]
+  },
+  "compensation": {
+    "quick_answer": "Most likely total annual compensation is 185000 to 215000 dollars.",
+    "base_range": { "low": 155000, "high": 180000 },
+    "total_comp_range": { "low": 170000, "high": 225000 },
+    "confidence": "medium"
+  },
+  "follow_up": {
+    "timezone": "America/New_York",
+    "touches": []
+  },
+  "dashboard_record": {
+    "job_id": "example-001",
+    "date_added": "2026-05-29",
+    "source_type": "url",
+    "company": "Example Co",
+    "title": "Director of AI Operations",
+    "current_status": "package generated"
+  }
+}

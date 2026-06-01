@@ -1,0 +1,32 @@
+{
+  "timezone": "America/New_York",
+  "touches": [
+    {
+      "touch": 1,
+      "channel": "email",
+      "timing": "same day as application",
+      "recipient_type": "recruiter",
+      "subject": "Interest in Example Co - Director of AI Operations",
+      "draft": "I applied today and wanted to share why the role maps closely to my AI operations and workflow automation background.",
+      "send_requires_approval": true
+    },
+    {
+      "touch": 2,
+      "channel": "linkedin",
+      "timing": "one day after application if no recruiter response",
+      "recipient_type": "hiring_manager",
+      "subject": null,
+      "draft": "I applied for the Director of AI Operations role and would value 15 minutes to understand what success should look like in the first quarter.",
+      "send_requires_approval": true
+    },
+    {
+      "touch": 3,
+      "channel": "linkedin",
+      "timing": "three days after application if no response",
+      "recipient_type": "peer",
+      "subject": null,
+      "draft": "I am exploring the role and would appreciate one sentence on the biggest bottleneck this team is trying to remove.",
+      "send_requires_approval": true
+    }
+  ]
+}

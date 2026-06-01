@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/outreach-sequence.schema.json",
+  "title": "OutreachSequence",
+  "type": "object",
+  "required": ["timezone", "touches"],
+  "properties": {
+    "timezone": { "type": "string" },
+    "touches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["touch", "channel", "timing", "recipient_type", "draft"],
+        "properties": {
+          "touch": { "type": "integer" },
+          "channel": { "type": "string" },
+          "timing": { "type": "string" },
+          "recipient_type": { "type": "string" },
+          "subject": { "type": ["string", "null"] },
+          "draft": { "type": "string" },
+          "send_requires_approval": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

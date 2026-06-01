@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mab.ai/schemas/job-hunt-os/dashboard-record.schema.json",
+  "title": "DashboardRecord",
+  "type": "object",
+  "required": ["job_id", "date_added", "source_type", "company", "title", "current_status"],
+  "properties": {
+    "job_id": { "type": "string" },
+    "date_added": { "type": "string" },
+    "source_type": { "type": "string" },
+    "source_url": { "type": ["string", "null"] },
+    "company": { "type": "string" },
+    "title": { "type": "string" },
+    "location": { "type": ["string", "null"] },
+    "work_mode": { "type": ["string", "null"] },
+    "current_status": { "type": "string" },
+    "direct_apply_url": { "type": ["string", "null"] },
+    "easy_apply_flag": { "type": ["boolean", "null"] },
+    "compensation": { "type": "object" },
+    "contacts": { "type": "object" },
+    "application_date": { "type": ["string", "null"] },
+    "last_contact_date": { "type": ["string", "null"] },
+    "next_follow_up_date": { "type": ["string", "null"] },
+    "response_flag": { "type": ["boolean", "null"] },
+    "interview_stage": { "type": ["string", "null"] },
+    "mock_score": { "type": ["number", "null"] },
+    "knowledge_gap_summary": { "type": ["string", "null"] },
+    "generated_resume_path": { "type": ["string", "null"] },
+    "generated_cover_letter_path": { "type": ["string", "null"] },
+    "notes": { "type": ["string", "null"] }
+  }
+}
