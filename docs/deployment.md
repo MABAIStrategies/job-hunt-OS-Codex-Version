@@ -1,6 +1,12 @@
 # Deployment
 
-Job Hunt OS v1 deploys as a Next.js app on Vercel and stores opportunity data in the user's browser. This keeps the first serviceable iteration usable for Mark's personal job search without persisting candidate or customer data on a shared backend.
+Job Hunt OS v1 deploys as a Next.js app on Vercel. Opportunities use browser local storage and the larger contact inventory uses browser IndexedDB. This keeps the first serviceable iteration usable for Mark's personal job search without persisting candidate or customer data on a shared backend.
+
+## Contact Import
+
+Open the `Contacts` workspace and import a CSV or TSV file. The browser recognizes common headings for names, email, phone, company, title, LinkedIn URL, location, tags, and notes. Reimports are deduplicated by email, LinkedIn URL, then name plus company.
+
+Use `examples/contacts-import-template.csv` as the canonical heading template. Contact data remains on the device and browser where it was imported until authenticated database persistence is implemented.
 
 ## Local Run
 
@@ -31,7 +37,7 @@ JOB_HUNT_AUTH_EMAIL=
 JOB_HUNT_AUTH_PASSWORD=
 ```
 
-Do not commit actual values. This gate is appropriate for the personal v1 only. Before customer or multi-user launch, replace it with Clerk, Neon Auth, Auth.js, or another managed account system with proper session handling, account recovery, auditability, and tenant isolation.
+Do not commit actual values. The current production deployment has this gate enabled through encrypted Vercel environment variables. This gate is appropriate for the personal v1 only. Before customer or multi-user launch, replace it with Clerk, Neon Auth, Auth.js, or another managed account system with proper session handling, account recovery, auditability, and tenant isolation.
 
 ## Future Integrations
 

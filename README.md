@@ -21,7 +21,7 @@ This repository now includes two pieces:
 - a Codex-native `job-hunt-os` skill package
 - a first serviceable Next.js dashboard for Mark's personal job search
 
-The web app is deployable to Vercel and stores opportunity data in browser local storage for v1. Hosted SaaS capabilities such as Neon Postgres, managed email/password auth, Stripe-hosted billing, internal counters, and tenant audit logs are documented in the roadmap and production architecture notes, but are not enabled for customer data yet.
+The web app is deployed to Vercel and stores opportunity data in browser local storage for v1. Its Contacts workspace imports large CSV or TSV lists into browser IndexedDB, deduplicates common records, and supports search, editing, export, and deletion. Hosted SaaS capabilities such as Neon Postgres, managed email/password auth, Stripe-hosted billing, internal counters, and tenant audit logs are documented in the roadmap and production architecture notes, but are not enabled for customer data yet.
 
 ## Repository Map
 
@@ -32,6 +32,7 @@ The web app is deployable to Vercel and stores opportunity data in browser local
 | `skills/job-hunt-os/schemas/` | JSON Schema contracts |
 | `skills/job-hunt-os/templates/` | Reusable output templates |
 | `examples/` | Example payloads for each schema |
+| `examples/contacts-import-template.csv` | Canonical contact import headings |
 | `product/master-spec.md` | Platform-agnostic canonical product spec |
 | `strategy/` | Roadmap, ICP sales sequences, pricing, production architecture |
 | `launch/` | Release copy, banner brief, video script, roadmap diagram, export manifest |

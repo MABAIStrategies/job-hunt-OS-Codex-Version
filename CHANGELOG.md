@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 - 2026-07-18
+
+- Added a dedicated Contacts workspace with CSV/TSV import, IndexedDB persistence, duplicate detection, search, editing, export, and deletion.
+- Added the canonical contact import template and documented the personal-v1 data boundary.
+- Enabled the optional single-user Vercel authentication gate through encrypted production environment variables.
+
 ## 0.1.0 - 2026-06-01
 
 - Created Codex-native Job Hunt OS skill package.

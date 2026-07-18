@@ -18,11 +18,26 @@ import {
   Target,
   Trash2,
   TrendingUp,
-  User
+  User,
+  UsersRound,
 } from "lucide-react";
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { ContactsWorkspace } from "./contacts-workspace";
 
-type Stage = "Prospect" | "Applied" | "In Process" | "Interview" | "Offer" | "Archived";
+type Stage =
+  | "Prospect"
+  | "Applied"
+  | "In Process"
+  | "Interview"
+  | "Offer"
+  | "Archived";
 type WorkMode = "Remote" | "Hybrid" | "In Office";
 
 type Opportunity = {
@@ -53,12 +68,21 @@ const targetProfile = {
   product: "Job Hunt OS",
   legalEntity: "MAB AI Strategies LLC",
   authPreference: "Email and password",
-  roleTargets: ["AI", "Strategy", "Innovation", "Director", "Sales", "GTM", "Business"],
-  geography: "50-mile radius around Wilmington, DE for hybrid/in-office; anywhere on earth if remote",
+  roleTargets: [
+    "AI",
+    "Strategy",
+    "Innovation",
+    "Director",
+    "Sales",
+    "GTM",
+    "Business",
+  ],
+  geography:
+    "50-mile radius around Wilmington, DE for hybrid/in-office; anywhere on earth if remote",
   minimumCompensation: MIN_TOTAL_COMP,
   avoid: "Verizon and telecom",
   resumeSource: "Desktop -> MAB AI Strategies -> Resume",
-  pilot: "Mark"
+  pilot: "Mark",
 };
 
 const seedOpportunities: Opportunity[] = [
@@ -75,9 +99,10 @@ const seedOpportunities: Opportunity[] = [
     nextStep: "Panel prep and case narrative",
     nextDate: "2026-07-22",
     priority: "High",
-    notes: "Strong GTM and AI platform fit. Emphasize enterprise motion, sales operating cadence, and executive stakeholder work.",
+    notes:
+      "Strong GTM and AI platform fit. Emphasize enterprise motion, sales operating cadence, and executive stakeholder work.",
     createdAt: "2026-07-01",
-    updatedAt: "2026-07-18"
+    updatedAt: "2026-07-18",
   },
   {
     id: "seed-openai",
@@ -92,9 +117,10 @@ const seedOpportunities: Opportunity[] = [
     nextStep: "Follow up with recruiter",
     nextDate: "2026-07-24",
     priority: "High",
-    notes: "Position around enterprise AI adoption, partner strategy, and measurable GTM outcomes.",
+    notes:
+      "Position around enterprise AI adoption, partner strategy, and measurable GTM outcomes.",
     createdAt: "2026-07-05",
-    updatedAt: "2026-07-16"
+    updatedAt: "2026-07-16",
   },
   {
     id: "seed-hubspot",
@@ -109,10 +135,11 @@ const seedOpportunities: Opportunity[] = [
     nextStep: "Send value snapshot",
     nextDate: "2026-07-25",
     priority: "Medium",
-    notes: "Map MAB AI Strategies work to AI-assisted revenue operations and enablement.",
+    notes:
+      "Map MAB AI Strategies work to AI-assisted revenue operations and enablement.",
     createdAt: "2026-07-09",
-    updatedAt: "2026-07-12"
-  }
+    updatedAt: "2026-07-12",
+  },
 ];
 
 const emptyDraft: OpportunityDraft = {
@@ -127,7 +154,7 @@ const emptyDraft: OpportunityDraft = {
   nextStep: "Research compensation and decision makers",
   nextDate: "",
   priority: "Medium",
-  notes: ""
+  notes: "",
 };
 
 const packageItems = [
@@ -137,7 +164,7 @@ const packageItems = [
   "Cover letter draft",
   "LinkedIn headline/About ready",
   "Follow-up sequence drafted",
-  "Interview proof stories mapped"
+  "Interview proof stories mapped",
 ];
 
 function createId() {
@@ -151,7 +178,7 @@ function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(amount);
 }
 
@@ -168,7 +195,7 @@ function parseCompensationRange(value: string) {
 
   return {
     low: Math.min(...numbers),
-    high: Math.max(...numbers)
+    high: Math.max(...numbers),
   };
 }
 
@@ -187,13 +214,23 @@ function isInTargetGeography(opportunity: Opportunity) {
 function scoreOpportunity(opportunity: Opportunity) {
   const comp = parseCompensationRange(opportunity.compensation);
   const roleText = `${opportunity.title} ${opportunity.notes}`.toLowerCase();
-  const roleMatchCount = targetProfile.roleTargets.filter((role) => roleText.includes(role.toLowerCase())).length;
-  const compensationScore = comp.high >= MIN_TOTAL_COMP ? 35 : comp.high > 0 ? 18 : 8;
+  const roleMatchCount = targetProfile.roleTargets.filter((role) =>
+    roleText.includes(role.toLowerCase()),
+  ).length;
+  const compensationScore =
+    comp.high >= MIN_TOTAL_COMP ? 35 : comp.high > 0 ? 18 : 8;
   const geographyScore = isInTargetGeography(opportunity) ? 25 : 5;
   const roleScore = Math.min(25, roleMatchCount * 7);
-  const momentumScore = ["Interview", "Offer"].includes(opportunity.stage) ? 15 : opportunity.stage === "In Process" ? 10 : 5;
+  const momentumScore = ["Interview", "Offer"].includes(opportunity.stage)
+    ? 15
+    : opportunity.stage === "In Process"
+      ? 10
+      : 5;
 
-  return Math.min(100, compensationScore + geographyScore + roleScore + momentumScore);
+  return Math.min(
+    100,
+    compensationScore + geographyScore + roleScore + momentumScore,
+  );
 }
 
 function toCsv(opportunities: Opportunity[]) {
@@ -210,15 +247,18 @@ function toCsv(opportunities: Opportunity[]) {
     "nextStep",
     "nextDate",
     "score",
-    "notes"
+    "notes",
   ];
   const rows = opportunities.map((opportunity) =>
     headers
       .map((header) => {
-        const value = header === "score" ? scoreOpportunity(opportunity) : opportunity[header as keyof Opportunity];
+        const value =
+          header === "score"
+            ? scoreOpportunity(opportunity)
+            : opportunity[header as keyof Opportunity];
         return `"${String(value ?? "").replaceAll('"', '""')}"`;
       })
-      .join(",")
+      .join(","),
   );
 
   return [headers.join(","), ...rows].join("\n");
@@ -228,7 +268,7 @@ function StatCard({
   icon,
   label,
   value,
-  detail
+  detail,
 }: {
   icon: ReactNode;
   label: string;
@@ -246,14 +286,30 @@ function StatCard({
 }
 
 function StageBadge({ stage }: { stage: Stage }) {
-  return <span className={`stage-badge stage-badge--${stage.toLowerCase().replaceAll(" ", "-")}`}>{stage}</span>;
+  return (
+    <span
+      className={`stage-badge stage-badge--${stage.toLowerCase().replaceAll(" ", "-")}`}
+    >
+      {stage}
+    </span>
+  );
 }
 
 export default function Home() {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>(seedOpportunities);
+  const [opportunities, setOpportunities] =
+    useState<Opportunity[]>(seedOpportunities);
   const [selectedId, setSelectedId] = useState(seedOpportunities[0]?.id ?? "");
   const [draft, setDraft] = useState<OpportunityDraft>(emptyDraft);
   const [query, setQuery] = useState("");
+  const [activeView, setActiveView] = useState<"dashboard" | "contacts">(
+    "dashboard",
+  );
+  const [contactCount, setContactCount] = useState(0);
+
+  const updateContactCount = useCallback(
+    (count: number) => setContactCount(count),
+    [],
+  );
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -283,20 +339,35 @@ export default function Home() {
     }
 
     return opportunities.filter((opportunity) =>
-      [opportunity.company, opportunity.title, opportunity.stage, opportunity.location, opportunity.notes]
+      [
+        opportunity.company,
+        opportunity.title,
+        opportunity.stage,
+        opportunity.location,
+        opportunity.notes,
+      ]
         .join(" ")
         .toLowerCase()
-        .includes(normalizedQuery)
+        .includes(normalizedQuery),
     );
   }, [opportunities, query]);
 
   const selectedOpportunity =
-    opportunities.find((opportunity) => opportunity.id === selectedId) ?? opportunities[0] ?? seedOpportunities[0];
+    opportunities.find((opportunity) => opportunity.id === selectedId) ??
+    opportunities[0] ??
+    seedOpportunities[0];
 
   const metrics = useMemo(() => {
-    const active = opportunities.filter((opportunity) => opportunity.stage !== "Archived");
+    const active = opportunities.filter(
+      (opportunity) => opportunity.stage !== "Archived",
+    );
     const averageScore = active.length
-      ? Math.round(active.reduce((total, opportunity) => total + scoreOpportunity(opportunity), 0) / active.length)
+      ? Math.round(
+          active.reduce(
+            (total, opportunity) => total + scoreOpportunity(opportunity),
+            0,
+          ) / active.length,
+        )
       : 0;
     const maxComp = active.reduce((highest, opportunity) => {
       const comp = parseCompensationRange(opportunity.compensation);
@@ -305,12 +376,18 @@ export default function Home() {
 
     return {
       total: active.length,
-      applied: active.filter((opportunity) => opportunity.stage === "Applied").length,
-      inMotion: active.filter((opportunity) => ["In Process", "Interview", "Offer"].includes(opportunity.stage)).length,
-      interviews: active.filter((opportunity) => opportunity.stage === "Interview").length,
-      offers: active.filter((opportunity) => opportunity.stage === "Offer").length,
+      applied: active.filter((opportunity) => opportunity.stage === "Applied")
+        .length,
+      inMotion: active.filter((opportunity) =>
+        ["In Process", "Interview", "Offer"].includes(opportunity.stage),
+      ).length,
+      interviews: active.filter(
+        (opportunity) => opportunity.stage === "Interview",
+      ).length,
+      offers: active.filter((opportunity) => opportunity.stage === "Offer")
+        .length,
       averageScore,
-      maxComp
+      maxComp,
     };
   }, [opportunities]);
 
@@ -327,7 +404,7 @@ export default function Home() {
       company: draft.company.trim(),
       title: draft.title.trim(),
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     setOpportunities((current) => [opportunity, ...current]);
@@ -339,28 +416,47 @@ export default function Home() {
     setOpportunities((current) =>
       current.map((opportunity) =>
         opportunity.id === selectedOpportunity.id
-          ? { ...opportunity, ...updates, updatedAt: new Date().toISOString().slice(0, 10) }
-          : opportunity
-      )
+          ? {
+              ...opportunity,
+              ...updates,
+              updatedAt: new Date().toISOString().slice(0, 10),
+            }
+          : opportunity,
+      ),
     );
   }
 
   function deleteSelected() {
     setOpportunities((current) => {
-      const next = current.filter((opportunity) => opportunity.id !== selectedOpportunity.id);
+      const next = current.filter(
+        (opportunity) => opportunity.id !== selectedOpportunity.id,
+      );
       setSelectedId(next[0]?.id ?? "");
       return next;
     });
   }
 
   function exportCsv() {
-    const blob = new Blob([toCsv(opportunities)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([toCsv(opportunities)], {
+      type: "text/csv;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = "job-hunt-os-dashboard.csv";
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  function showDashboardSection(sectionId: string) {
+    setActiveView("dashboard");
+    window.setTimeout(
+      () =>
+        document
+          .getElementById(sectionId)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      0,
+    );
   }
 
   return (
@@ -375,22 +471,51 @@ export default function Home() {
         </div>
 
         <nav className="nav-stack" aria-label="Primary">
-          <a className="nav-item nav-item--active" href="#dashboard">
+          <button
+            className={`nav-item${activeView === "dashboard" ? " nav-item--active" : ""}`}
+            type="button"
+            onClick={() => showDashboardSection("dashboard")}
+          >
             <Target size={16} />
             <span>Dashboard</span>
-          </a>
-          <a className="nav-item" href="#opportunities">
+          </button>
+          <button
+            className="nav-item"
+            type="button"
+            onClick={() => showDashboardSection("opportunities")}
+          >
             <Briefcase size={16} />
             <span>Opportunities</span>
-          </a>
-          <a className="nav-item" href="#package">
+          </button>
+          <button
+            className="nav-item"
+            type="button"
+            onClick={() => showDashboardSection("package")}
+          >
             <FileText size={16} />
             <span>Resume Package</span>
-          </a>
-          <a className="nav-item" href="#readiness">
+          </button>
+          <button
+            className={`nav-item${activeView === "contacts" ? " nav-item--active" : ""}`}
+            type="button"
+            onClick={() => setActiveView("contacts")}
+          >
+            <UsersRound size={16} />
+            <span>Contacts</span>
+            {contactCount ? (
+              <small className="nav-count">
+                {contactCount.toLocaleString()}
+              </small>
+            ) : null}
+          </button>
+          <button
+            className="nav-item"
+            type="button"
+            onClick={() => showDashboardSection("readiness")}
+          >
             <Shield size={16} />
             <span>Readiness</span>
-          </a>
+          </button>
         </nav>
 
         <div className="rail-panel">
@@ -405,282 +530,425 @@ export default function Home() {
         </div>
       </aside>
 
-      <section className="workspace" id="dashboard">
-        <header className="top-bar">
-          <div>
-            <p className="eyebrow">Live personal workspace</p>
-            <h2>Executive Job Search Dashboard</h2>
-          </div>
-          <div className="top-actions">
-            <button className="icon-button" type="button" onClick={exportCsv} aria-label="Export CSV" title="Export CSV">
-              <Download size={18} />
-            </button>
-            <button
-              className="icon-button"
-              type="button"
-              onClick={() => {
-                setOpportunities(seedOpportunities);
-                setSelectedId(seedOpportunities[0].id);
-              }}
-              aria-label="Restore starter opportunities"
-              title="Restore starter opportunities"
-            >
-              <RefreshCcw size={18} />
-            </button>
-          </div>
-        </header>
+      {activeView === "contacts" ? (
+        <ContactsWorkspace onCountChange={updateContactCount} />
+      ) : (
+        <>
+          <section className="workspace" id="dashboard">
+            <header className="top-bar">
+              <div>
+                <p className="eyebrow">Live personal workspace</p>
+                <h2>Executive Job Search Dashboard</h2>
+              </div>
+              <div className="top-actions">
+                <button
+                  className="icon-button"
+                  type="button"
+                  onClick={exportCsv}
+                  aria-label="Export CSV"
+                  title="Export CSV"
+                >
+                  <Download size={18} />
+                </button>
+                <button
+                  className="icon-button"
+                  type="button"
+                  onClick={() => {
+                    setOpportunities(seedOpportunities);
+                    setSelectedId(seedOpportunities[0].id);
+                  }}
+                  aria-label="Restore starter opportunities"
+                  title="Restore starter opportunities"
+                >
+                  <RefreshCcw size={18} />
+                </button>
+              </div>
+            </header>
 
-        <section className="target-strip" aria-labelledby="target-profile">
-          <div className="section-header">
-            <div>
-              <p className="eyebrow">Target Profile</p>
-              <h3 id="target-profile">{targetProfile.owner}</h3>
-            </div>
-            <span className="status-pill">Browser storage v1</span>
-          </div>
-          <div className="target-grid">
-            <div>
-              <User size={17} />
-              <span>Roles</span>
-              <strong>{targetProfile.roleTargets.join(" / ")}</strong>
-            </div>
-            <div>
-              <MapPin size={17} />
-              <span>Geography</span>
-              <strong>{targetProfile.geography}</strong>
-            </div>
-            <div>
-              <DollarSign size={17} />
-              <span>Compensation Floor</span>
-              <strong>{formatCurrency(targetProfile.minimumCompensation)} total annual compensation</strong>
-            </div>
-            <div>
-              <Building2 size={17} />
-              <span>Avoid</span>
-              <strong>{targetProfile.avoid}</strong>
-            </div>
-          </div>
-        </section>
+            <section className="target-strip" aria-labelledby="target-profile">
+              <div className="section-header">
+                <div>
+                  <p className="eyebrow">Target Profile</p>
+                  <h3 id="target-profile">{targetProfile.owner}</h3>
+                </div>
+                <span className="status-pill">Browser storage v1</span>
+              </div>
+              <div className="target-grid">
+                <div>
+                  <User size={17} />
+                  <span>Roles</span>
+                  <strong>{targetProfile.roleTargets.join(" / ")}</strong>
+                </div>
+                <div>
+                  <MapPin size={17} />
+                  <span>Geography</span>
+                  <strong>{targetProfile.geography}</strong>
+                </div>
+                <div>
+                  <DollarSign size={17} />
+                  <span>Compensation Floor</span>
+                  <strong>
+                    {formatCurrency(targetProfile.minimumCompensation)} total
+                    annual compensation
+                  </strong>
+                </div>
+                <div>
+                  <Building2 size={17} />
+                  <span>Avoid</span>
+                  <strong>{targetProfile.avoid}</strong>
+                </div>
+              </div>
+            </section>
 
-        <section className="metrics-grid" aria-label="Pipeline metrics">
-          <StatCard icon={<Briefcase size={18} />} label="Active opportunities" value={String(metrics.total)} detail="Not archived" />
-          <StatCard icon={<CheckCircle2 size={18} />} label="Applied" value={String(metrics.applied)} detail="Submitted packages" />
-          <StatCard icon={<TrendingUp size={18} />} label="In motion" value={String(metrics.inMotion)} detail="Recruiter or hiring flow" />
-          <StatCard icon={<Calendar size={18} />} label="Interviews" value={String(metrics.interviews)} detail="Prep required" />
-          <StatCard icon={<Target size={18} />} label="Offers" value={String(metrics.offers)} detail="Negotiation track" />
-          <StatCard icon={<DollarSign size={18} />} label="Highest target comp" value={metrics.maxComp ? formatCurrency(metrics.maxComp) : "$0"} detail="Parsed from saved roles" />
-        </section>
+            <section className="metrics-grid" aria-label="Pipeline metrics">
+              <StatCard
+                icon={<Briefcase size={18} />}
+                label="Active opportunities"
+                value={String(metrics.total)}
+                detail="Not archived"
+              />
+              <StatCard
+                icon={<CheckCircle2 size={18} />}
+                label="Applied"
+                value={String(metrics.applied)}
+                detail="Submitted packages"
+              />
+              <StatCard
+                icon={<TrendingUp size={18} />}
+                label="In motion"
+                value={String(metrics.inMotion)}
+                detail="Recruiter or hiring flow"
+              />
+              <StatCard
+                icon={<Calendar size={18} />}
+                label="Interviews"
+                value={String(metrics.interviews)}
+                detail="Prep required"
+              />
+              <StatCard
+                icon={<Target size={18} />}
+                label="Offers"
+                value={String(metrics.offers)}
+                detail="Negotiation track"
+              />
+              <StatCard
+                icon={<DollarSign size={18} />}
+                label="Highest target comp"
+                value={metrics.maxComp ? formatCurrency(metrics.maxComp) : "$0"}
+                detail="Parsed from saved roles"
+              />
+            </section>
 
-        <form className="add-row" onSubmit={addOpportunity}>
-          <label>
-            <span>Company</span>
-            <input
-              value={draft.company}
-              onChange={(event) => setDraft((current) => ({ ...current, company: event.target.value }))}
-              placeholder="Company"
-            />
-          </label>
-          <label>
-            <span>Role</span>
-            <input
-              value={draft.title}
-              onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-              placeholder="Role title"
-            />
-          </label>
-          <label>
-            <span>Stage</span>
-            <select value={draft.stage} onChange={(event) => setDraft((current) => ({ ...current, stage: event.target.value as Stage }))}>
-              {["Prospect", "Applied", "In Process", "Interview", "Offer"].map((stage) => (
-                <option key={stage}>{stage}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Work mode</span>
-            <select
-              value={draft.workMode}
-              onChange={(event) => setDraft((current) => ({ ...current, workMode: event.target.value as WorkMode }))}
-            >
-              {["Remote", "Hybrid", "In Office"].map((mode) => (
-                <option key={mode}>{mode}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Compensation</span>
-            <input
-              value={draft.compensation}
-              onChange={(event) => setDraft((current) => ({ ...current, compensation: event.target.value }))}
-              placeholder="$185K+"
-            />
-          </label>
-          <button className="primary-button" type="submit">
-            <Plus size={18} />
-            Add Opportunity
-          </button>
-        </form>
+            <form className="add-row" onSubmit={addOpportunity}>
+              <label>
+                <span>Company</span>
+                <input
+                  value={draft.company}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      company: event.target.value,
+                    }))
+                  }
+                  placeholder="Company"
+                />
+              </label>
+              <label>
+                <span>Role</span>
+                <input
+                  value={draft.title}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      title: event.target.value,
+                    }))
+                  }
+                  placeholder="Role title"
+                />
+              </label>
+              <label>
+                <span>Stage</span>
+                <select
+                  value={draft.stage}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      stage: event.target.value as Stage,
+                    }))
+                  }
+                >
+                  {[
+                    "Prospect",
+                    "Applied",
+                    "In Process",
+                    "Interview",
+                    "Offer",
+                  ].map((stage) => (
+                    <option key={stage}>{stage}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Work mode</span>
+                <select
+                  value={draft.workMode}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      workMode: event.target.value as WorkMode,
+                    }))
+                  }
+                >
+                  {["Remote", "Hybrid", "In Office"].map((mode) => (
+                    <option key={mode}>{mode}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>Compensation</span>
+                <input
+                  value={draft.compensation}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      compensation: event.target.value,
+                    }))
+                  }
+                  placeholder="$185K+"
+                />
+              </label>
+              <button className="primary-button" type="submit">
+                <Plus size={18} />
+                Add Opportunity
+              </button>
+            </form>
 
-        <section className="opportunity-section" id="opportunities">
-          <div className="section-header">
-            <div>
-              <p className="eyebrow">Pipeline</p>
-              <h3>Opportunities</h3>
-            </div>
-            <label className="search-box">
-              <Search size={16} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" />
-            </label>
-          </div>
+            <section className="opportunity-section" id="opportunities">
+              <div className="section-header">
+                <div>
+                  <p className="eyebrow">Pipeline</p>
+                  <h3>Opportunities</h3>
+                </div>
+                <label className="search-box">
+                  <Search size={16} />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search"
+                  />
+                </label>
+              </div>
 
-          <div className="table-shell" role="region" aria-label="Saved opportunities">
-            <table>
-              <thead>
-                <tr>
-                  <th>Company</th>
-                  <th>Role</th>
-                  <th>Stage</th>
-                  <th>Next Step</th>
-                  <th>Comp</th>
-                  <th>Fit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOpportunities.map((opportunity) => (
-                  <tr
-                    key={opportunity.id}
-                    className={opportunity.id === selectedOpportunity.id ? "selected-row" : ""}
-                    onClick={() => setSelectedId(opportunity.id)}
+              <div
+                className="table-shell"
+                role="region"
+                aria-label="Saved opportunities"
+              >
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Company</th>
+                      <th>Role</th>
+                      <th>Stage</th>
+                      <th>Next Step</th>
+                      <th>Comp</th>
+                      <th>Fit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOpportunities.map((opportunity) => (
+                      <tr
+                        key={opportunity.id}
+                        className={
+                          opportunity.id === selectedOpportunity.id
+                            ? "selected-row"
+                            : ""
+                        }
+                        onClick={() => setSelectedId(opportunity.id)}
+                      >
+                        <td>
+                          <strong>{opportunity.company}</strong>
+                          <span>{opportunity.location}</span>
+                        </td>
+                        <td>{opportunity.title}</td>
+                        <td>
+                          <StageBadge stage={opportunity.stage} />
+                        </td>
+                        <td>
+                          <strong>
+                            {opportunity.nextStep || "Assign next step"}
+                          </strong>
+                          <span>{opportunity.nextDate || "No date set"}</span>
+                        </td>
+                        <td>{opportunity.compensation}</td>
+                        <td>
+                          <span className="fit-score">
+                            {scoreOpportunity(opportunity)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <aside className="detail-panel" aria-label="Opportunity detail">
+            <section className="detail-card">
+              <div className="detail-heading">
+                <div>
+                  <p className="eyebrow">Selected Opportunity</p>
+                  <h3>{selectedOpportunity.company}</h3>
+                  <span>{selectedOpportunity.title}</span>
+                </div>
+                <span className="fit-score fit-score--large">
+                  {scoreOpportunity(selectedOpportunity)}
+                </span>
+              </div>
+
+              <div className="badge-row">
+                <StageBadge stage={selectedOpportunity.stage} />
+                <span className="status-pill">
+                  {selectedOpportunity.workMode}
+                </span>
+                <span className="status-pill">
+                  {selectedOpportunity.priority} priority
+                </span>
+              </div>
+
+              <div className="detail-grid">
+                <label>
+                  <span>Stage</span>
+                  <select
+                    value={selectedOpportunity.stage}
+                    onChange={(event) =>
+                      updateSelected({ stage: event.target.value as Stage })
+                    }
                   >
-                    <td>
-                      <strong>{opportunity.company}</strong>
-                      <span>{opportunity.location}</span>
-                    </td>
-                    <td>{opportunity.title}</td>
-                    <td>
-                      <StageBadge stage={opportunity.stage} />
-                    </td>
-                    <td>
-                      <strong>{opportunity.nextStep || "Assign next step"}</strong>
-                      <span>{opportunity.nextDate || "No date set"}</span>
-                    </td>
-                    <td>{opportunity.compensation}</td>
-                    <td>
-                      <span className="fit-score">{scoreOpportunity(opportunity)}</span>
-                    </td>
-                  </tr>
+                    {[
+                      "Prospect",
+                      "Applied",
+                      "In Process",
+                      "Interview",
+                      "Offer",
+                      "Archived",
+                    ].map((stage) => (
+                      <option key={stage}>{stage}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>Priority</span>
+                  <select
+                    value={selectedOpportunity.priority}
+                    onChange={(event) =>
+                      updateSelected({
+                        priority: event.target.value as Opportunity["priority"],
+                      })
+                    }
+                  >
+                    {["Low", "Medium", "High"].map((priority) => (
+                      <option key={priority}>{priority}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>Next step</span>
+                  <input
+                    value={selectedOpportunity.nextStep}
+                    onChange={(event) =>
+                      updateSelected({ nextStep: event.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  <span>Next date</span>
+                  <input
+                    type="date"
+                    value={selectedOpportunity.nextDate}
+                    onChange={(event) =>
+                      updateSelected({ nextDate: event.target.value })
+                    }
+                  />
+                </label>
+              </div>
+
+              <label className="notes-field">
+                <span>Notes</span>
+                <textarea
+                  value={selectedOpportunity.notes}
+                  onChange={(event) =>
+                    updateSelected({ notes: event.target.value })
+                  }
+                  rows={7}
+                />
+              </label>
+
+              <div className="detail-actions">
+                {selectedOpportunity.sourceUrl ? (
+                  <a
+                    className="secondary-button"
+                    href={selectedOpportunity.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <ExternalLink size={16} />
+                    Source
+                  </a>
+                ) : null}
+                <button
+                  className="danger-button"
+                  type="button"
+                  onClick={deleteSelected}
+                >
+                  <Trash2 size={16} />
+                  Delete
+                </button>
+              </div>
+            </section>
+
+            <section className="detail-card" id="package">
+              <div className="section-header">
+                <div>
+                  <p className="eyebrow">Application Package</p>
+                  <h3>Readiness Checklist</h3>
+                </div>
+                <ListChecks size={18} />
+              </div>
+              <ul className="checklist">
+                {packageItems.map((item, index) => (
+                  <li key={item}>
+                    <CheckCircle2
+                      className={index < 3 ? "check-ready" : "check-pending"}
+                      size={18}
+                    />
+                    <span>{item}</span>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </section>
+              </ul>
+            </section>
 
-      <aside className="detail-panel" aria-label="Opportunity detail">
-        <section className="detail-card">
-          <div className="detail-heading">
-            <div>
-              <p className="eyebrow">Selected Opportunity</p>
-              <h3>{selectedOpportunity.company}</h3>
-              <span>{selectedOpportunity.title}</span>
-            </div>
-            <span className="fit-score fit-score--large">{scoreOpportunity(selectedOpportunity)}</span>
-          </div>
-
-          <div className="badge-row">
-            <StageBadge stage={selectedOpportunity.stage} />
-            <span className="status-pill">{selectedOpportunity.workMode}</span>
-            <span className="status-pill">{selectedOpportunity.priority} priority</span>
-          </div>
-
-          <div className="detail-grid">
-            <label>
-              <span>Stage</span>
-              <select
-                value={selectedOpportunity.stage}
-                onChange={(event) => updateSelected({ stage: event.target.value as Stage })}
-              >
-                {["Prospect", "Applied", "In Process", "Interview", "Offer", "Archived"].map((stage) => (
-                  <option key={stage}>{stage}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Priority</span>
-              <select
-                value={selectedOpportunity.priority}
-                onChange={(event) => updateSelected({ priority: event.target.value as Opportunity["priority"] })}
-              >
-                {["Low", "Medium", "High"].map((priority) => (
-                  <option key={priority}>{priority}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Next step</span>
-              <input value={selectedOpportunity.nextStep} onChange={(event) => updateSelected({ nextStep: event.target.value })} />
-            </label>
-            <label>
-              <span>Next date</span>
-              <input type="date" value={selectedOpportunity.nextDate} onChange={(event) => updateSelected({ nextDate: event.target.value })} />
-            </label>
-          </div>
-
-          <label className="notes-field">
-            <span>Notes</span>
-            <textarea value={selectedOpportunity.notes} onChange={(event) => updateSelected({ notes: event.target.value })} rows={7} />
-          </label>
-
-          <div className="detail-actions">
-            {selectedOpportunity.sourceUrl ? (
-              <a className="secondary-button" href={selectedOpportunity.sourceUrl} target="_blank" rel="noreferrer">
-                <ExternalLink size={16} />
-                Source
-              </a>
-            ) : null}
-            <button className="danger-button" type="button" onClick={deleteSelected}>
-              <Trash2 size={16} />
-              Delete
-            </button>
-          </div>
-        </section>
-
-        <section className="detail-card" id="package">
-          <div className="section-header">
-            <div>
-              <p className="eyebrow">Application Package</p>
-              <h3>Readiness Checklist</h3>
-            </div>
-            <ListChecks size={18} />
-          </div>
-          <ul className="checklist">
-            {packageItems.map((item, index) => (
-              <li key={item}>
-                <CheckCircle2 className={index < 3 ? "check-ready" : "check-pending"} size={18} />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="detail-card" id="readiness">
-          <div className="section-header">
-            <div>
-              <p className="eyebrow">Production Path</p>
-              <h3>Integration Queue</h3>
-            </div>
-            <Shield size={18} />
-          </div>
-          <div className="integration-list">
-            <span>Neon Postgres</span>
-            <strong>Ready for guarded setup</strong>
-            <span>Email/password auth</span>
-            <strong>Env-gated basic auth now, Clerk/Neon Auth later</strong>
-            <span>Stripe Link</span>
-            <strong>Payment link hook reserved</strong>
-          </div>
-        </section>
-      </aside>
+            <section className="detail-card" id="readiness">
+              <div className="section-header">
+                <div>
+                  <p className="eyebrow">Production Path</p>
+                  <h3>Integration Queue</h3>
+                </div>
+                <Shield size={18} />
+              </div>
+              <div className="integration-list">
+                <span>Neon Postgres</span>
+                <strong>Ready for guarded setup</strong>
+                <span>Email/password auth</span>
+                <strong>Env-gated basic auth now, Clerk/Neon Auth later</strong>
+                <span>Stripe Link</span>
+                <strong>Payment link hook reserved</strong>
+              </div>
+            </section>
+          </aside>
+        </>
+      )}
     </main>
   );
 }

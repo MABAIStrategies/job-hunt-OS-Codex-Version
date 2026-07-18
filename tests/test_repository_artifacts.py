@@ -26,9 +26,12 @@ EXPECTED_FILES = [
     "vercel.json",
     "app/layout.tsx",
     "app/page.tsx",
+    "app/contacts-workspace.tsx",
     "app/globals.css",
+    "lib/contacts.ts",
     "proxy.ts",
     "docs/deployment.md",
+    "examples/contacts-import-template.csv",
     "skills/job-hunt-os/SKILL.md",
     "skills/job-hunt-os/agents/openai.yaml",
     "skills/job-hunt-os/references/intake.md",
@@ -176,3 +179,17 @@ def test_web_app_includes_personal_pilot_defaults():
     assert "185000" in page
     assert "Verizon and telecom" in page
     assert "Desktop -> MAB AI Strategies -> Resume" in page
+
+
+def test_contact_import_is_local_and_deduplicated():
+    page = read_text("app/page.tsx")
+    workspace = read_text("app/contacts-workspace.tsx")
+    contacts = read_text("lib/contacts.ts")
+
+    assert "ContactsWorkspace" in page
+    assert "Import contacts" in workspace
+    assert "indexedDB" in contacts
+    assert "duplicateRecords" in contacts
+    assert "email:" in contacts
+    assert "linkedin:" in contacts
+    assert "accept=\".csv,.tsv" in workspace
