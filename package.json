@@ -1,0 +1,28 @@
+{
+  "name": "job-hunt-os-codex-version",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Codex-native Job Hunt OS skill package and deployable personal dashboard for MAB AI Strategies.",
+  "scripts": {
+    "dev": "node node_modules/next/dist/bin/next dev",
+    "build": "node node_modules/next/dist/bin/next build",
+    "start": "node node_modules/next/dist/bin/next start",
+    "test": "python3 -m pytest",
+    "validate": "python3 /Users/mark/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/job-hunt-os && python3 -m pytest && npm run build"
+  },
+  "dependencies": {
+    "lucide-react": "1.25.0",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "overrides": {
+    "postcss": "8.5.19"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,6 +1,6 @@
 # Job Hunt OS Codex Version
 
-Job Hunt OS is a Codex-native operating package for turning a job opportunity into a complete, truthful, role-specific application workflow.
+Job Hunt OS is a Codex-native operating package and deployable personal dashboard for turning a job opportunity into a complete, truthful, role-specific application workflow.
 
 It accepts a job URL, screenshot, pasted job description, or target title and produces the operating artifacts needed for a disciplined job hunt:
 
@@ -16,7 +16,12 @@ It accepts a job URL, screenshot, pasted job description, or target title and pr
 
 ## Status
 
-This repository is the first professional version of the Job Hunt OS operating package. It is local and file-based by design. Hosted SaaS capabilities such as Neon Postgres, OAuth, Stripe-hosted billing, internal counters, and tenant audit logs are documented in the roadmap and production architecture notes, but are not implemented in this repo yet.
+This repository now includes two pieces:
+
+- a Codex-native `job-hunt-os` skill package
+- a first serviceable Next.js dashboard for Mark's personal job search
+
+The web app is deployable to Vercel and stores opportunity data in browser local storage for v1. Hosted SaaS capabilities such as Neon Postgres, managed email/password auth, Stripe-hosted billing, internal counters, and tenant audit logs are documented in the roadmap and production architecture notes, but are not enabled for customer data yet.
 
 ## Repository Map
 
@@ -30,7 +35,10 @@ This repository is the first professional version of the Job Hunt OS operating p
 | `product/master-spec.md` | Platform-agnostic canonical product spec |
 | `strategy/` | Roadmap, ICP sales sequences, pricing, production architecture |
 | `launch/` | Release copy, banner brief, video script, roadmap diagram, export manifest |
+| `app/` | Next.js personal dashboard |
+| `proxy.ts` | Optional env-gated single-user auth gate for Vercel |
 | `tests/` | Repository artifact and migration hygiene tests |
+| `docs/deployment.md` | Vercel deployment and env variable notes |
 | `docs/go-live-checklist.md` | Pre-production checklist |
 
 ## Visual Assets
@@ -40,16 +48,19 @@ This repository is the first professional version of the Job Hunt OS operating p
 
 ## Validation
 
-Install dev dependencies:
+Install dependencies:
 
 ```bash
 python3 -m pip install -r requirements-dev.txt
+npm install
 ```
 
-Run repository tests:
+Run repository and web checks:
 
 ```bash
 python3 -m pytest tests/test_repository_artifacts.py -q
+npm audit --audit-level=moderate
+npm run build
 ```
 
 Validate the Codex skill package:

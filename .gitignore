@@ -25,6 +25,16 @@ build/
 tmp/
 temp/
 
+# Node / Next.js
+node_modules/
+.next/
+out/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel/
+
 # Editor and OS state
 .idea/
 .vscode/

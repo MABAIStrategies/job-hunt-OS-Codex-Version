@@ -1,6 +1,6 @@
 # Production Architecture Direction
 
-V1 stays local and file-based. Production moves to a hosted SaaS architecture only after the local operating package is validated.
+V1 stays local and file-based. The deployable dashboard stores data in browser local storage so Mark can use it immediately without persisting candidate data on a hosted backend. Production moves to a hosted SaaS architecture only after the local operating package and personal pilot workflow are validated.
 
 ## Data Layer
 
@@ -23,7 +23,8 @@ Core table groups:
 
 ## Authentication
 
-- Use OAuth before storing customer information remotely.
+- The personal Vercel build may use an env-gated HTTP Basic Auth gate.
+- Use managed email/password auth before storing customer information remotely.
 - Keep tenant boundaries explicit in every customer-owned table.
 - Store minimum personal data required for the workflow.
 - Support account deletion and export before broad launch.

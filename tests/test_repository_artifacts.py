@@ -18,6 +18,17 @@ EXPECTED_FILES = [
     "docs/go-live-checklist.md",
     "docs/verification.md",
     "requirements-dev.txt",
+    ".env.example",
+    "package.json",
+    "package-lock.json",
+    "next.config.mjs",
+    "tsconfig.json",
+    "vercel.json",
+    "app/layout.tsx",
+    "app/page.tsx",
+    "app/globals.css",
+    "proxy.ts",
+    "docs/deployment.md",
     "skills/job-hunt-os/SKILL.md",
     "skills/job-hunt-os/agents/openai.yaml",
     "skills/job-hunt-os/references/intake.md",
@@ -48,6 +59,7 @@ EXPECTED_FILES = [
     "launch/social-banner-brief.md",
     "launch/roadmap-diagram.mmd",
     "launch/export-manifest.json",
+    "launch/design-reference/job-hunt-os-dashboard-concept.png",
 ]
 
 
@@ -154,3 +166,13 @@ def test_launch_manifest_covers_social_platforms():
         "instagram",
     }.issubset(platforms)
     assert manifest["verification_required"] is True
+
+
+def test_web_app_includes_personal_pilot_defaults():
+    page = read_text("app/page.tsx")
+    assert "MABAIStrategies" in page
+    assert "MAB AI Strategies LLC" in page
+    assert "Wilmington, DE" in page
+    assert "185000" in page
+    assert "Verizon and telecom" in page
+    assert "Desktop -> MAB AI Strategies -> Resume" in page

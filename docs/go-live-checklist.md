@@ -6,10 +6,21 @@ Use this before treating Job Hunt OS as live, active, or customer-ready.
 
 - [ ] Repository visibility is private.
 - [ ] README reflects current status and validation commands.
+- [ ] `docs/deployment.md` reflects the current Vercel project and auth mode.
 - [ ] Proprietary license is present.
 - [ ] Security policy is present.
 - [ ] CI validation passes on GitHub.
 - [ ] No secrets, resumes, customer data, or generated personal packages are committed.
+
+## Web App
+
+- [ ] `npm ci` completes.
+- [ ] `npm audit --audit-level=moderate` returns zero vulnerabilities.
+- [ ] `npm run build` succeeds.
+- [ ] Desktop and mobile screenshots show no broken layout, overlapping text, or blank primary surfaces.
+- [ ] Vercel production deployment is accessible.
+- [ ] If personal auth is enabled, `JOB_HUNT_AUTH_EMAIL` and `JOB_HUNT_AUTH_PASSWORD` are set only in Vercel environment variables.
+- [ ] Browser-storage v1 is understood before entering sensitive data on shared devices.
 
 ## Skill Package
 
@@ -33,7 +44,7 @@ Use this before treating Job Hunt OS as live, active, or customer-ready.
 
 ## Customer Pilot
 
-- [ ] Pilot ICP and buyer are selected.
+- [x] Pilot ICP and buyer are selected: Mark.
 - [ ] Pilot success metrics are defined.
 - [ ] Customer onboarding workflow is written.
 - [ ] Support and escalation owner is assigned.
