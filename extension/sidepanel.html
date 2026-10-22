@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Job Hunt OS</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="icons/icon32.png" alt=""><span>Job Hunt OS</span></div>
+    <span id="planBadge" class="plan-badge">Scout</span>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-view="tailor" class="active">Tailor</button>
+    <button role="tab" data-view="scan">Find Jobs</button>
+    <button role="tab" data-view="pipeline">Pipeline</button>
+    <button role="tab" data-view="settings">Settings</button>
+  </nav>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <main id="view"></main>
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>
