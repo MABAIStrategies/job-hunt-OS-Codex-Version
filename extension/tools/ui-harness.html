@@ -42,7 +42,8 @@
       source_text: 'Grew ARR from $4M to $11M in 30 months. Led a team of 12 AEs. 15+ years',
     };
     if (!location.hash.includes('fresh')) mem.local.profile = PROFILE;
-    mem.local.settings = { apiKey: 'test-key-not-real', plan: 'pro' };
+    const prov = (location.hash.match(/provider=(\w+)/) || [])[1] || 'anthropic';
+    mem.local.settings = { provider: prov, keys: { [prov]: 'test-key-not-real' }, plan: 'pro' };
     window.chrome = {
       storage: { local: area('local'), session: area('session'), onChanged: { addListener() {} } },
       tabs: { query: async () => [{ id: 1, url: 'https://boards.greenhouse.io/acme/jobs/1' }], create: (o) => window.open(o.url), update: async () => {}, onUpdated: { addListener() {}, removeListener() {} } },
@@ -77,10 +78,16 @@
       { id: 'c2', must_have_coverage: 0.5, title_adjacency: 0.3, domain_fit: 0.5, seniority_gap: 1, location_fit: 1, reason: 'Role below level' } ] };
     const realFetch = window.fetch;
     window.fetch = async (url, opts) => {
-      if (String(url).includes('api.anthropic.com')) {
-        const body = JSON.parse(opts.body);
-        const out = body.system.includes('INTERVIEW for each job') ? SCAN : PKG;
-        return new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify(out) }], stop_reason: 'end_turn' }));
+      const u = String(url);
+      if (/anthropic|googleapis|openai|x\.ai|openrouter|groq|nvidia/.test(u)) {
+        window.lastAICall = { url: u, headers: opts.headers, body: JSON.parse(opts.body) };
+        const b = window.lastAICall.body;
+        const sys = b.system || b.system_instruction?.parts?.[0]?.text || b.messages?.[0]?.content || '';
+        const text = JSON.stringify(sys.includes('INTERVIEW for each job') ? SCAN : PKG);
+        const shape = u.includes('anthropic') ? { content: [{ type: 'text', text }], stop_reason: 'end_turn' }
+          : u.includes('googleapis') ? { candidates: [{ content: { parts: [{ text }] }, finishReason: 'STOP' }] }
+          : { choices: [{ message: { content: text }, finish_reason: 'stop' }] };
+        return new Response(JSON.stringify(shape));
       }
       return realFetch(url, opts);
     };

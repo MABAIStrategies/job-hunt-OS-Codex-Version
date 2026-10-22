@@ -1,5 +1,5 @@
 import * as store from './lib/storage.js';
-import { callClaudeJSON } from './lib/ai.js';
+import { callAIJSON, PROVIDERS, providerConfig, listModels } from './lib/ai.js';
 import { PROFILE_SYSTEM, TAILOR_SYSTEM, SCAN_SYSTEM, profileDigest } from './lib/prompts.js';
 import { extractJobPosting, extractJobCards, paintBadges, attachFilesToPage } from './lib/extract.js';
 import { likelihood, explain, prefilterScore, parseSignals } from './lib/scoring.js';
@@ -80,13 +80,15 @@ function render() {
 // ---------- onboarding: resume first, always ----------
 function viewOnboarding() {
   const s = state.settings;
-  const key = h('input', { type: 'password', placeholder: 'sk-ant-…', value: s.apiKey, autocomplete: 'off' });
+  const prov = providerSelect(s.provider);
+  const key = h('input', { type: 'password', placeholder: PROVIDERS[s.provider].keyHint, value: s.keys[s.provider] || '', autocomplete: 'off' });
+  prov.addEventListener('change', () => { key.placeholder = PROVIDERS[prov.value].keyHint; key.value = s.keys[prov.value] || ''; });
   const file = h('input', { type: 'file', accept: '.pdf,.txt,.md,application/pdf,text/plain' });
   const paste = h('textarea', { placeholder: '…or paste your resume text here' });
   const photo = h('input', { type: 'file', accept: 'image/*' });
   const buildBtn = h('button', { class: 'btn primary' }, 'Build my master profile');
   buildBtn.addEventListener('click', () => busy(buildBtn, 'Reading your resume…', async () => {
-    if (key.value.trim() !== s.apiKey) state.settings = await store.saveSettings({ apiKey: key.value.trim() });
+    state.settings = await store.saveSettings({ provider: prov.value, keys: { ...state.settings.keys, [prov.value]: key.value.trim() } });
     const f = file.files[0];
     if (!f && paste.value.trim().length < 200) throw new Error('Upload your resume (PDF or TXT) or paste it first.');
     if (f && /\.docx?$/i.test(f.name)) throw new Error('Please export your resume as PDF (Word files are not supported yet).');
@@ -100,11 +102,13 @@ function viewOnboarding() {
       h('div', { class: 'big' }, 'Start with your resume'),
       h('p', { class: 'muted' }, 'Upload your master resume once. Every tailored resume, cover letter, and job match is built from it. Employers, titles, and dates are locked and never changed.')),
     card(
-      h('label', {}, 'Anthropic API key (stored only on this device)', key),
+      h('label', {}, 'AI provider', prov),
+      h('label', {}, 'API key (stored only on this device)', key),
+      h('p', { class: 'muted' }, "Groq, NVIDIA NIM and Grok can't read PDFs — paste your resume text instead, or add a Gemini/OpenAI/OpenRouter/Claude key in Settings for this step."),
       h('label', {}, 'Master resume', file), paste,
       h('label', {}, 'Professional headshot (optional)', photo),
       buildBtn,
-      h('p', { class: 'muted' }, 'Your resume is sent to Claude only to build your profile and documents. Nothing is shared with employers until you choose to.')),
+      h('p', { class: 'muted' }, 'Your resume is sent to your chosen AI provider only to build your profile and documents. Nothing is shared with employers until you choose to.')),
   ];
 }
 
@@ -117,7 +121,7 @@ async function buildProfile(file, pastedText) {
     content.push({ type: 'text', text: `RESUME:\n${file ? await file.text() : pastedText}` });
   }
   content.push({ type: 'text', text: 'Build the master profile JSON. Also add a "source_text" field containing the full resume as plain text, verbatim.' });
-  const profile = await callClaudeJSON({ settings: state.settings, system: PROFILE_SYSTEM, content, maxTokens: 12000 });
+  const profile = await callAIJSON({ settings: state.settings, system: PROFILE_SYSTEM, content, maxTokens: 12000 });
   if (!profile.experience?.length) throw new Error('Could not find work experience in that resume. Try the pasted-text option.');
   await store.saveProfile(profile);
   state.profile = await store.getProfile();
@@ -185,7 +189,7 @@ async function buildPackage() {
     `JOB POSTING\nURL: ${j.url}\nDetected ATS: ${j.ats}\nEasy Apply: ${j.easyApply}\nTitle: ${j.title}\nCompany: ${j.company}\nLocation: ${j.location}\nPosted: ${j.datePosted}\nSalary data: ${j.salary}\n\n${j.description}` }];
   const webSearch = s.liveResearch && plan.liveResearch;
   if (webSearch) content.push({ type: 'text', text: 'Use web search to check current compensation signals and recent company news for the hook. Then return the JSON.' });
-  const pkg = await callClaudeJSON({ settings: s, system: TAILOR_SYSTEM, content, maxTokens: 16000, webSearch });
+  const pkg = await callAIJSON({ settings: s, system: TAILOR_SYSTEM, content, maxTokens: 16000, webSearch });
   await store.bumpUsage('package');
   state.pkg = pkg;
   state.model = buildResumeModel(state.profile, pkg);
@@ -402,7 +406,7 @@ async function runScan() {
   for (let i = 0; i < ranked.length; i += 20) {
     const batch = ranked.slice(i, i + 20);
     const jobs = batch.map((c) => ({ id: c.id, title: c.title, company: c.company, location: c.location, text: c.snippet.slice(0, c.deep ? 3500 : 600) }));
-    const r = await callClaudeJSON({ settings: s, model: s.fastModel, system: SCAN_SYSTEM, maxTokens: 6000,
+    const r = await callAIJSON({ settings: s, fast: true, system: SCAN_SYSTEM, maxTokens: 6000,
       content: [{ type: 'text', text: `CANDIDATE:\n${JSON.stringify(digest)}\n\nJOBS:\n${JSON.stringify(jobs)}` }] });
     const byId = new Map((r.results || []).map((x) => [x.id, x]));
     for (const c of batch) {
@@ -520,6 +524,53 @@ async function patchApp(a, patch) {
   render();
 }
 
+// ---------- AI provider settings ----------
+function providerSelect(current) {
+  return h('select', {}, Object.entries(PROVIDERS).map(([id, p]) => h('option', { value: id, selected: id === current }, p.label)));
+}
+
+function aiCard(live) {
+  const s = state.settings;
+  const active = providerConfig(s);
+  const prov = providerSelect(s.provider);
+  prov.addEventListener('change', async () => { state.settings = await store.saveSettings({ provider: prov.value }); render(); });
+
+  const listId = 'jhos-models';
+  const datalist = h('datalist', { id: listId });
+  const modelInput = (field) => {
+    const el = h('input', { type: 'text', value: active[field], list: listId });
+    el.addEventListener('change', async () => {
+      const models = { ...state.settings.models, [active.id]: { ...(state.settings.models[active.id] || {}), [field]: el.value.trim() } };
+      state.settings = await store.saveSettings({ models }); toast('Saved');
+    });
+    return el;
+  };
+  const load = h('button', { class: 'btn small' }, 'Test key + load models');
+  load.addEventListener('click', () => busy(load, 'Checking…', async () => {
+    const ids = await listModels(state.settings, active.id);
+    datalist.replaceChildren(...ids.map((m) => h('option', { value: m })));
+    toast(`Key works — ${ids.length} models available`);
+  }));
+
+  const keyRows = Object.entries(PROVIDERS).map(([id, p]) => {
+    const el = h('input', { type: 'password', value: s.keys[id] || '', placeholder: p.keyHint, autocomplete: 'off' });
+    el.addEventListener('change', async () => { state.settings = await store.saveSettings({ keys: { ...state.settings.keys, [id]: el.value.trim() } }); toast('Key saved'); render(); });
+    return h('label', {}, h('span', { class: 'row spread' }, p.label, h('a', { href: p.keyUrl, target: '_blank', class: 'muted' }, 'Get key')), el);
+  });
+
+  return card(h('h2', {}, 'AI provider'),
+    h('label', {}, 'Use for writing + scanning', prov),
+    active.key ? null : h('div', { class: 'flag bad' }, `Add a ${active.label} key below.`),
+    h('label', {}, 'Writing model', modelInput('model')),
+    h('label', {}, 'Scan model (fast, cheap)', modelInput('fastModel')),
+    datalist, load,
+    h('div', { class: 'muted' }, [active.pdf ? 'Reads PDFs' : 'Text only (no PDF upload)', active.search ? 'live web research' : 'no live web research'].join(' · ')),
+    h('label', { class: 'row' }, live, `Live research: current comp + company news (Pro+${active.search ? '' : '; not available on this provider'})`),
+    h('details', {}, h('summary', {}, `API keys (${Object.values(s.keys).filter(Boolean).length} saved)`),
+      h('p', { class: 'muted' }, 'API keys are billed by each provider separately from ChatGPT Plus, Gemini Advanced or SuperGrok subscriptions. Keys stay on this device and go only to that provider.'),
+      ...keyRows));
+}
+
 // ---------- Settings ----------
 function viewSettings() {
   const s = state.settings;
@@ -551,11 +602,7 @@ function viewSettings() {
         h('div', { class: 'muted' }, `Matches unlocked: ${pct(p.unlockedFloor)}${p.unlockedCeiling > 1 ? '+ (all)' : `–${Math.round(p.unlockedCeiling * 100 - 1)}%`} · ${p.packagesPerMonth} packages/mo · ${p.scansPerDay} scans/day · ${p.deepScan ? `full-JD deep read of top ${p.deepScan}` : 'card-level scoring'}${p.liveResearch ? ' · live comp + company research' : ''}${p.interviewPrep ? ' · interview prep' : ''}`))),
       h('label', {}, 'License key', inp('licenseKey', { placeholder: 'Paste after purchase' })),
       h('label', {}, 'Plan (developer override until billing is live)', sel('plan', Object.entries(PLANS).map(([id, p]) => [id, p.name])))),
-    card(h('h2', {}, 'AI'),
-      h('label', {}, 'Anthropic API key', inp('apiKey', { type: 'password', autocomplete: 'off' })),
-      h('label', {}, 'Writing model', inp('model')),
-      h('label', {}, 'Scan model (fast)', inp('fastModel')),
-      h('label', { class: 'row' }, live, 'Live research: current comp + company news (Pro+)')),
+    aiCard(live),
     card(h('h2', {}, 'Google Sheet tracker'),
       h('p', { class: 'muted' }, 'Deploy apps-script/Code.gs from your tracker sheet as a web app, then paste its URL and token here. PDFs go to Drive and get share links you can paste into any application.'),
       h('label', {}, 'Web app URL', inp('sheetWebAppUrl', { type: 'url', placeholder: 'https://script.google.com/macros/s/…/exec' })),

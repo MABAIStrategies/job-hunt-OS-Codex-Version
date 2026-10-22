@@ -2,10 +2,10 @@
 // profile, applications) stays on-device unless they connect a Google Sheet.
 
 const DEFAULT_SETTINGS = {
-  apiKey: '',                 // user's own Anthropic key (BYOK). Never synced.
-  model: 'claude-sonnet-5-5', // tailoring / generation
-  fastModel: 'claude-haiku-5-5', // board-scan scoring
-  liveResearch: false,        // let Claude use web search for comp + company intel
+  provider: 'anthropic',      // active AI provider (see lib/ai.js PROVIDERS)
+  keys: {},                   // { providerId: apiKey } — BYOK, stored on this device only
+  models: {},                 // { providerId: { model, fastModel } } overrides
+  liveResearch: false,        // let the model use web search for comp + company intel
   sheetWebAppUrl: '',         // Apps Script web app URL (see apps-script/Code.gs)
   sheetToken: '',             // shared secret checked by the Apps Script
   headshotMode: 'direct_only',// 'always' | 'direct_only' | 'never'
@@ -17,7 +17,14 @@ const DEFAULT_SETTINGS = {
 
 export async function getSettings() {
   const { settings } = await chrome.storage.local.get('settings');
-  return { ...DEFAULT_SETTINGS, ...(settings || {}) };
+  const s = { ...DEFAULT_SETTINGS, ...(settings || {}) };
+  // v0.1 stored a single Anthropic key + models at the top level.
+  if (s.apiKey && !s.keys.anthropic) {
+    s.keys = { ...s.keys, anthropic: s.apiKey };
+    s.models = { ...s.models, anthropic: { model: s.model, fastModel: s.fastModel } };
+  }
+  delete s.apiKey; delete s.model; delete s.fastModel;
+  return s;
 }
 
 export async function saveSettings(patch) {

@@ -22,9 +22,27 @@ It's built on the `job-hunt-os` and `resume-optimizer` skills: same truth policy
 
 ## Install (developer mode)
 
-1. `chrome://extensions` → enable **Developer mode** → **Load unpacked** → select this `extension/` folder.
-2. Pin **Job Hunt OS** and click it to open the side panel.
-3. Paste your Anthropic API key and upload your resume (PDF or TXT). A headshot is optional; by default it's only used for direct or referral applications, since ATS portals strip photos.
+1. `chrome://extensions` → enable **Developer mode** → **Load unpacked** → select the **`extension`** folder inside the repo (the one that contains `manifest.json`), not the repo root. Picking the root gives "Manifest file is missing or unreadable."
+2. Pin **Job Hunt OS** from the puzzle-piece menu and click it to open the side panel.
+3. Choose an AI provider, paste its API key, and upload your resume (PDF or TXT). A headshot is optional; by default it's only used for direct or referral applications, since ATS portals strip photos.
+
+### AI providers
+
+Pick one in **Settings → AI provider**. Keys are saved per provider, so you can switch at any time. **Test key + load models** checks the key and lists the model IDs it can use.
+
+| Provider | Reads PDF resumes | Live web research | Default writing / scan models |
+|---|---|---|---|
+| Anthropic (Claude) | ✓ | ✓ | claude-sonnet-5-5 / claude-haiku-5-5 |
+| Google AI Studio (Gemini) | ✓ | ✓ (Google Search) | gemini-2.5-pro / gemini-2.5-flash |
+| OpenAI | ✓ | – | gpt-5 / gpt-5-mini |
+| xAI (Grok) | text only | – | grok-4 / grok-3-mini |
+| OpenRouter | ✓ | ✓ (web plugin) | anthropic/claude-sonnet-4.5 / google/gemini-2.5-flash |
+| Groq | text only | – | openai/gpt-oss-120b / llama-3.1-8b-instant |
+| NVIDIA NIM | text only | – | meta/llama-3.3-70b-instruct / meta/llama-3.1-8b-instruct |
+
+You can edit the model IDs. If the active provider can't read PDFs and you've saved a key for one that can, the one-time resume parsing uses that one automatically. Otherwise, paste your resume text.
+
+**Subscriptions vs. API keys:** ChatGPT Plus/Pro, Gemini Advanced / Google AI Pro, and SuperGrok are chat-app subscriptions. None of them include API access, and none of these providers lets a third-party app sign in with them. Each provider needs an API key from its developer console, billed separately (Google AI Studio and Groq have free tiers; NVIDIA NIM gives trial credits).
 
 ### Connect the Google Sheet (optional, recommended)
 
@@ -40,7 +58,7 @@ extension/
   manifest.json        MV3; side panel, optional host permissions requested per site
   background.js        side panel, context menus, Alt+Shift+J, daily follow-up alarm
   sidepanel.*          UI: onboarding gate, Tailor, Find Jobs, Pipeline, Settings
-  lib/ai.js            Claude Messages API (BYOK; swap BASE_URL for a proxy)
+  lib/ai.js            7 providers (Claude, Gemini, OpenAI, Grok, OpenRouter, Groq, NIM); BYOK
   lib/prompts.js       profile, tailor and scan prompts (skill rules distilled)
   lib/extract.js       functions injected into pages: JD capture, card scan, badges, file attach
   lib/scoring.js       interview-likelihood model + local prefilter + page signals
@@ -65,6 +83,6 @@ This checks scoring, the Truth Lock and PDF output, and writes samples to `tools
 
 ## Privacy
 
-Your resume, profile and applications are stored in `chrome.storage.local`. The resume and job text go to Anthropic only when you build a profile, tailor, or scan. Files go to your own Google Drive only when you click **Save to Drive + Sheet**. Drive links are set to *anyone with the link can view* so recruiters can open them.
+Your resume, profile and applications are stored in `chrome.storage.local`. The resume and job text go to your chosen AI provider only when you build a profile, tailor, or scan. Files go to your own Google Drive only when you click **Save to Drive + Sheet**. Drive links are set to *anyone with the link can view* so recruiters can open them.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/PRICING.md](docs/PRICING.md).
