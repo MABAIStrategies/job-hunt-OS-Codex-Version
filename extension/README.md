@@ -33,14 +33,14 @@ Pick one in **Settings → AI provider**. Keys are saved per provider, so you ca
 | Provider | Reads PDF resumes | Live web research | Default writing / scan models |
 |---|---|---|---|
 | Anthropic (Claude) | ✓ | ✓ | claude-sonnet-5-5 / claude-haiku-5-5 |
-| Google AI Studio (Gemini) | ✓ | ✓ (Google Search) | gemini-2.5-pro / gemini-2.5-flash |
-| OpenAI | ✓ | – | gpt-5 / gpt-5-mini |
-| xAI (Grok) | text only | – | grok-4 / grok-3-mini |
-| OpenRouter | ✓ | ✓ (web plugin) | anthropic/claude-sonnet-4.5 / google/gemini-2.5-flash |
-| Groq | text only | – | openai/gpt-oss-120b / llama-3.1-8b-instant |
-| NVIDIA NIM | text only | – | meta/llama-3.3-70b-instruct / meta/llama-3.1-8b-instruct |
+| Google AI Studio (Gemini) | ✓ | ✓ (Google Search) | gemini-3.8-flash / gemini-3.5-flash-lite |
+| OpenAI | ✓ | – | gpt-5.6-terra / gpt-5.6-luna |
+| xAI (Grok) | text only | – | grok-4.7 / grok-4.7 |
+| OpenRouter | ✓ | ✓ (web plugin) | anthropic/claude-sonnet-5.5 / anthropic/claude-haiku-5.5 |
+| Groq | text only | – | openai/gpt-oss-120b / openai/gpt-oss-20b |
+| NVIDIA NIM | text only | – | nvidia/nemotron-3-super-120b-a12b / openai/gpt-oss-20b |
 
-You can edit the model IDs. If the active provider can't read PDFs and you've saved a key for one that can, the one-time resume parsing uses that one automatically. Otherwise, paste your resume text.
+Defaults were checked against each provider's model docs on 2026-10-22. Providers retire models often. If a request fails because a model is retired or unavailable, the extension reads your key's model list, switches to the newest equivalent (for example `gemini-2.5-pro` → `gemini-3.8-flash`), saves it, retries, and tells you. **Test key + load models** does the same check up front. You can still edit the model IDs. If the active provider can't read PDFs and you've saved a key for one that can, the one-time resume parsing uses that one automatically. Otherwise, paste your resume text.
 
 **Subscriptions vs. API keys:** ChatGPT Plus/Pro, Gemini Advanced / Google AI Pro, and SuperGrok are chat-app subscriptions. None of them include API access, and none of these providers lets a third-party app sign in with them. Each provider needs an API key from its developer console, billed separately (Google AI Studio and Groq have free tiers; NVIDIA NIM gives trial credits).
 

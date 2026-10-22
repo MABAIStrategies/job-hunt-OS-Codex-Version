@@ -3,7 +3,9 @@
 // — and each adapter translates it. Swap a provider's `base` for your own
 // proxy when you move to hosted billing.
 
-export class AIError extends Error {}
+export class AIError extends Error {
+  constructor(message, status) { super(message); this.status = status; }
+}
 
 // Anthropic's server tool name, split so the repo's migration-hygiene grep
 // (which bans the literal from old skill runtimes) doesn't flag it.
@@ -11,6 +13,9 @@ const SEARCH_TOOL = ['web', 'search'].join('_');
 
 // pdf: provider reads PDFs natively. search: provider has a live web-search tool.
 // maxOut: hard cap on output tokens some endpoints enforce.
+// Default model IDs were checked against each provider's docs on 2026-10-22.
+// When a provider retires one, callAI swaps in the newest match from
+// PREFER (below) using the key's live model list, so users aren't stranded.
 export const PROVIDERS = {
   anthropic: {
     label: 'Anthropic (Claude)', kind: 'anthropic', base: 'https://api.anthropic.com/v1',
@@ -19,33 +24,33 @@ export const PROVIDERS = {
   },
   google: {
     label: 'Google AI Studio (Gemini)', kind: 'gemini', base: 'https://generativelanguage.googleapis.com/v1beta',
-    model: 'gemini-2.5-pro', fastModel: 'gemini-2.5-flash', pdf: true, search: true,
+    model: 'gemini-3.8-flash', fastModel: 'gemini-3.5-flash-lite', pdf: true, search: true,
     keyHint: 'AIza…', keyUrl: 'https://aistudio.google.com/apikey',
   },
   openai: {
     label: 'OpenAI', kind: 'openai', base: 'https://api.openai.com/v1',
-    model: 'gpt-5', fastModel: 'gpt-5-mini', pdf: true, search: false, json: true, maxParam: 'max_completion_tokens',
+    model: 'gpt-5.6-terra', fastModel: 'gpt-5.6-luna', pdf: true, search: false, json: true, maxParam: 'max_completion_tokens',
     keyHint: 'sk-…', keyUrl: 'https://platform.openai.com/api-keys',
   },
   xai: {
     label: 'xAI (Grok)', kind: 'openai', base: 'https://api.x.ai/v1',
-    model: 'grok-4', fastModel: 'grok-3-mini', pdf: false, search: false, json: true,
+    model: 'grok-4.7', fastModel: 'grok-4.7', pdf: false, search: false, json: true,
     keyHint: 'xai-…', keyUrl: 'https://console.x.ai/',
   },
   openrouter: {
     label: 'OpenRouter', kind: 'openai', base: 'https://openrouter.ai/api/v1',
-    model: 'anthropic/claude-sonnet-4.5', fastModel: 'google/gemini-2.5-flash', pdf: true, search: true,
+    model: 'anthropic/claude-sonnet-5.5', fastModel: 'anthropic/claude-haiku-5.5', pdf: true, search: true,
     keyHint: 'sk-or-…', keyUrl: 'https://openrouter.ai/keys',
     headers: { 'HTTP-Referer': 'https://github.com/MABAIStrategies/job-hunt-OS-Codex-Version', 'X-Title': 'Job Hunt OS' },
   },
   groq: {
     label: 'Groq', kind: 'openai', base: 'https://api.groq.com/openai/v1',
-    model: 'openai/gpt-oss-120b', fastModel: 'llama-3.1-8b-instant', pdf: false, search: false, json: true, maxOut: 32000,
+    model: 'openai/gpt-oss-120b', fastModel: 'openai/gpt-oss-20b', pdf: false, search: false, json: true, maxOut: 32000,
     keyHint: 'gsk_…', keyUrl: 'https://console.groq.com/keys',
   },
   nvidia: {
     label: 'NVIDIA NIM', kind: 'openai', base: 'https://integrate.api.nvidia.com/v1',
-    model: 'meta/llama-3.3-70b-instruct', fastModel: 'meta/llama-3.1-8b-instruct', pdf: false, search: false, maxOut: 8192,
+    model: 'nvidia/nemotron-3-super-120b-a12b', fastModel: 'openai/gpt-oss-20b', pdf: false, search: false, maxOut: 8192,
     keyHint: 'nvapi-…', keyUrl: 'https://build.nvidia.com/',
   },
 };
@@ -56,6 +61,38 @@ export function providerConfig(settings, id = settings.provider) {
   const m = settings.models?.[id] || {};
   return { id, ...p, key: (settings.keys?.[id] || '').trim(), model: m.model || p.model, fastModel: m.fastModel || p.fastModel };
 }
+
+// Ranked patterns for picking a replacement when a model is retired; the
+// highest version among the first pattern that matches wins.
+const PREFER = {
+  anthropic: { model: [/^claude-sonnet-/, /^claude-opus-/], fastModel: [/^claude-haiku-/, /^claude-sonnet-/] },
+  google: { model: [/^gemini-[\d.]+-flash$/, /^gemini-[\d.]+-pro/], fastModel: [/^gemini-[\d.]+-flash-lite$/, /^gemini-[\d.]+-flash$/] },
+  openai: { model: [/^gpt-[\d.]+-terra$/, /^gpt-[\d.]+$/], fastModel: [/^gpt-[\d.]+-luna$/, /^gpt-[\d.]+-mini$/] },
+  xai: { model: [/^grok-[\d.]+$/], fastModel: [/^grok-[\d.]+(-fast|-mini)?$/] },
+  openrouter: { model: [/^anthropic\/claude-sonnet-/, /^google\/gemini-[\d.]+-flash$/], fastModel: [/^anthropic\/claude-haiku-/, /^google\/gemini-[\d.]+-flash-lite$/] },
+  groq: { model: [/gpt-oss-120b$/, /^qwen\//], fastModel: [/gpt-oss-20b$/, /gpt-oss-120b$/] },
+  nvidia: { model: [/nemotron-3-super/, /nemotron-3-ultra/, /gpt-oss/], fastModel: [/gpt-oss-20b$/, /nemotron-3[.\d]*-(nano|lightning)/] },
+};
+const NOT_CHAT = /tts|image|imagine|live|audio|voice|transcribe|embed|guard|safety|translate|moderation|realtime|search-preview|codex|calibration/i;
+const versionKey = (id) => (id.match(/\d+(?:\.\d+)*/g) || []).join('.').split('.').map(Number);
+const newer = (a, b) => {
+  const va = versionKey(a), vb = versionKey(b);
+  for (let i = 0; i < Math.max(va.length, vb.length); i++) if ((va[i] || 0) !== (vb[i] || 0)) return (vb[i] || 0) - (va[i] || 0);
+  return a.length - b.length;
+};
+
+export function pickReplacement(providerId, field, available) {
+  const ids = available.filter((m) => !NOT_CHAT.test(m));
+  for (const re of PREFER[providerId]?.[field] || []) {
+    const hits = ids.filter((m) => re.test(m)).sort(newer);
+    if (hits.length) return hits[0];
+  }
+  return null;
+}
+
+export const isRetiredModelError = (e) => e instanceof AIError
+  && (e.status === 404 || /model/i.test(e.message))
+  && /not found|no longer available|does not exist|deprecat|decommission|retired|not supported|invalid model|unknown model|not available|no access|shut ?down/i.test(e.message);
 
 export function configuredProviders(settings) {
   return Object.keys(PROVIDERS).filter((id) => (settings.keys?.[id] || '').trim());
@@ -70,7 +107,25 @@ export function pickProvider(settings, { needsPdf = false } = {}) {
   return alt || active;
 }
 
-export async function callAI({ settings, system, content, fast = false, maxTokens = 8000, webSearch = false, provider }) {
+// onModelChange(providerId, field, newModel) persists a swap after a retirement.
+export async function callAI(opts) {
+  try {
+    return await callAIOnce(opts);
+  } catch (e) {
+    if (!isRetiredModelError(e)) throw e;
+    const needsPdf = opts.content.some((b) => b.type === 'document');
+    const p = opts.provider ? providerConfig(opts.settings, opts.provider) : pickProvider(opts.settings, { needsPdf });
+    const field = opts.fast ? 'fastModel' : 'model';
+    const next = pickReplacement(p.id, field, await listModels(opts.settings, p.id).catch(() => []));
+    if (!next || next === p[field]) throw e;
+    const settings = { ...opts.settings, models: { ...opts.settings.models, [p.id]: { ...(opts.settings.models?.[p.id] || {}), [field]: next } } };
+    await opts.onModelChange?.(p.id, field, next, p[field]);
+    opts.settings = settings; // so callAIJSON's retry reuses the swapped model
+    return callAIOnce(opts);
+  }
+}
+
+async function callAIOnce({ settings, system, content, fast = false, maxTokens = 8000, webSearch = false, provider }) {
   const needsPdf = content.some((b) => b.type === 'document');
   const p = provider ? providerConfig(settings, provider) : pickProvider(settings, { needsPdf });
   if (!p.key) throw new AIError(`Add your ${p.label} API key in Settings first.`);
@@ -93,7 +148,7 @@ async function post(url, headers, body, label) {
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = json?.error?.message || json?.message || json?.detail || (typeof json?.error === 'string' ? json.error : '') || `HTTP ${res.status}`;
-    throw new AIError(`${label}: ${msg}`);
+    throw new AIError(`${label}: ${msg}`, res.status);
   }
   return json;
 }

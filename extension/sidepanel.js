@@ -1,5 +1,5 @@
 import * as store from './lib/storage.js';
-import { callAIJSON, PROVIDERS, providerConfig, listModels } from './lib/ai.js';
+import { callAIJSON as callAIJSONRaw, PROVIDERS, providerConfig, listModels, pickReplacement } from './lib/ai.js';
 import { PROFILE_SYSTEM, TAILOR_SYSTEM, SCAN_SYSTEM, profileDigest } from './lib/prompts.js';
 import { extractJobPosting, extractJobCards, paintBadges, attachFilesToPage } from './lib/extract.js';
 import { likelihood, explain, prefilterScore, parseSignals } from './lib/scoring.js';
@@ -10,6 +10,14 @@ import { bytesToBase64 } from './lib/pdf.js';
 import * as sheets from './lib/sheets.js';
 
 const DAY = 86400000;
+
+// Every AI call self-heals when a provider retires the configured model.
+const callAIJSON = (opts) => callAIJSONRaw({ onModelChange, ...opts });
+async function onModelChange(pid, field, next, old) {
+  const models = { ...state.settings.models, [pid]: { ...(state.settings.models[pid] || {}), [field]: next } };
+  state.settings = await store.saveSettings({ models });
+  toast(`${PROVIDERS[pid].label}: ${old} is retired — switched to ${next}.`);
+}
 const $view = document.getElementById('view');
 const state = { view: 'tailor', settings: null, profile: null, job: null, pkg: null, model: null, docs: null, app: null, scan: null };
 
@@ -549,7 +557,14 @@ function aiCard(live) {
   load.addEventListener('click', () => busy(load, 'Checking…', async () => {
     const ids = await listModels(state.settings, active.id);
     datalist.replaceChildren(...ids.map((m) => h('option', { value: m })));
-    toast(`Key works — ${ids.length} models available`);
+    const swaps = [];
+    for (const field of ['model', 'fastModel']) {
+      if (ids.includes(active[field])) continue;
+      const next = pickReplacement(active.id, field, ids);
+      if (next) { await onModelChange(active.id, field, next, active[field]); swaps.push(`${active[field]} → ${next}`); }
+    }
+    if (swaps.length) render();
+    toast(`Key works — ${ids.length} models available${swaps.length ? `. Updated unavailable models: ${swaps.join(', ')}` : ''}`);
   }));
 
   const keyRows = Object.entries(PROVIDERS).map(([id, p]) => {

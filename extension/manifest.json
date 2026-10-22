@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Job Hunt OS — Tailor & Track",
   "short_name": "Job Hunt OS",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tailor a truthful, ATS-optimized resume + cover letter to any job page in one click, find jobs you are likely to land, and track everything in Google Sheets.",
   "minimum_chrome_version": "116",
   "action": {
