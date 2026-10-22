@@ -1,0 +1,97 @@
+<!doctype html>
+<!-- Dev harness: runs the real side panel against a stubbed chrome.* API and a
+     canned Claude response. Serve the extension folder over http and open
+     /tools/ui-harness.html (ES modules don't load from file://). -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Job Hunt OS harness</title>
+  <link rel="stylesheet" href="../sidepanel.css">
+  <style>body { max-width: 420px; margin: 0 auto; border-inline: 1px solid #ccc; min-height: 100vh; }</style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="../icons/icon32.png" alt=""><span>Job Hunt OS</span></div>
+    <span id="planBadge" class="plan-badge">Scout</span>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-view="tailor" class="active">Tailor</button>
+    <button role="tab" data-view="scan">Find Jobs</button>
+    <button role="tab" data-view="pipeline">Pipeline</button>
+    <button role="tab" data-view="settings">Settings</button>
+  </nav>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <main id="view"></main>
+  <script>
+    const mem = { local: {}, session: {} };
+    const area = (k) => ({
+      get: async (key) => (typeof key === 'string' ? { [key]: mem[k][key] } : { ...mem[k] }),
+      set: async (o) => Object.assign(mem[k], structuredClone(o)),
+      remove: async (key) => { delete mem[k][key]; },
+    });
+    const PROFILE = {
+      personal: { name: 'Mark Bockrath', email: 'bockrath.ai@gmail.com', phone: '302-519-2960', location: 'Greater Philadelphia', linkedin: 'https://www.linkedin.com/in/mark-b-a5a1b2196/' },
+      summary: 'AI-driven B2B sales leader.', career_level: 'director', primary_industry: 'SaaS', target_titles: ['Director of Sales', 'VP Sales'],
+      keywords_bank: ['enterprise sales', 'saas', 'pipeline', 'ai automation', 'forecasting', 'salesforce'],
+      experience: [
+        { title: 'Director, Mid-Enterprise Sales', company: 'Example Co', dates: '2021 – Present', location: 'Remote', bullets: ['Grew ARR from $4M to $11M in 30 months'] },
+        { title: 'Regional Sales Manager', company: 'Prior Co', dates: '2016 – 2021', location: 'Philadelphia, PA', bullets: ['Led a team of 12 AEs'] },
+      ],
+      education: [{ degree: 'B.S. Business Administration', institution: 'University of Delaware', year: '2008' }],
+      skills: { technical: [], tools: ['Salesforce'], certifications: [] },
+      source_text: 'Grew ARR from $4M to $11M in 30 months. Led a team of 12 AEs. 15+ years',
+    };
+    if (!location.hash.includes('fresh')) mem.local.profile = PROFILE;
+    const prov = (location.hash.match(/provider=(\w+)/) || [])[1] || 'anthropic';
+    mem.local.settings = { provider: prov, keys: { [prov]: 'test-key-not-real' }, plan: 'pro' };
+    window.chrome = {
+      storage: { local: area('local'), session: area('session'), onChanged: { addListener() {} } },
+      tabs: { query: async () => [{ id: 1, url: 'https://boards.greenhouse.io/acme/jobs/1' }], create: (o) => window.open(o.url), update: async () => {}, onUpdated: { addListener() {}, removeListener() {} } },
+      permissions: { contains: async () => true, request: async () => true },
+      scripting: {
+        executeScript: async ({ func }) => {
+          if (func.name === 'extractJobPosting') return [{ result: { url: 'https://boards.greenhouse.io/acme/jobs/1', host: 'boards.greenhouse.io', ats: 'Greenhouse', title: 'VP, Enterprise Sales', company: 'Acme AI', location: 'Remote (US)', description: 'We are hiring a VP of Enterprise Sales to scale our AI platform. '.repeat(12), applyUrl: '#', easyApply: false, signalsText: 'Posted 3 days ago', datePosted: '', salary: '' } }];
+          if (func.name === 'extractJobCards') return [{ result: { url: 'https://www.linkedin.com/jobs/search', cards: [
+            { id: 'c0', title: 'VP Sales', company: 'Acme', location: 'Remote', snippet: 'enterprise saas pipeline', url: 'https://x/1' },
+            { id: 'c1', title: 'Director of Sales', company: 'Beta', location: 'Philadelphia', snippet: 'saas ai automation', url: 'https://x/2' },
+            { id: 'c2', title: 'Sales Development Rep', company: 'Gamma', location: 'NYC', snippet: 'cold calls', url: 'https://x/3' } ] } }];
+          return [{ result: { ok: true, attached: ['resume'] } }];
+        },
+      },
+    };
+    const PKG = {
+      job: { title: 'VP, Enterprise Sales', company: 'Acme AI', location: 'Remote', application_method: 'ats_portal', ats_platform: 'Greenhouse' },
+      ats: { before: 46, after: 84, missing: [{ keyword: 'MEDDICC', priority: 'critical', where: 'Skills' }, { keyword: 'channel partners', priority: 'high', where: 'Bullet' }], unsupported: ['Gong'], red_flags: [{ flag: 'Title gap', severity: 'medium', detail: 'Director → VP', handled: 'Summary frames scope' }] },
+      resume: { headline: 'Enterprise Sales Leader | AI-Native GTM', summary: 'VP-ready enterprise sales leader with 15+ years building AI-enabled revenue engines.', core_competencies: ['Enterprise SaaS', 'Pipeline Strategy'], skills: { technical: ['AI sales automation'], tools: ['Salesforce'] },
+        experience: [{ index: 0, bullets: ['Scaled ARR from $4M to $11M in 30 months', 'Raised win rate 300% with AI scoring'] }, { index: 1, bullets: ['Led a team of 12 AEs'] }] },
+      cover_letter: { paragraphs: ['Acme just shipped agents.', 'I scaled ARR $4M → $11M.', 'You need a repeatable motion.', 'Open to 20 minutes?'], closing: 'Sincerely,' },
+      linkedin: { headline: 'Enterprise Sales Leader | AI GTM' },
+      outreach: { recruiter: 'Hi [Name] — just applied…', hiring_manager: 'Hi [Name]…', peer: 'Hi [Name]…' },
+      interview: [{ question: 'How would you build the first enterprise playbook?', why: 'Core of role', hook: 'Example Co ARR growth' }],
+      compensation: { base_low: 230000, base_high: 260000, total_low: 420000, total_high: 500000, confidence: 'medium', note: 'Remote US, Series C' },
+      likelihood: { must_have_coverage: 0.8, title_adjacency: 0.7, domain_fit: 0.85, seniority_gap: -1, location_fit: 1, reasons: ['Strong SaaS scaling record'] },
+      changes_log: [{ section: 'Summary', change: 'Mirrored VP title', reason: 'JD title' }], color_scheme: 'tech_navy',
+    };
+    const SCAN = { results: [
+      { id: 'c0', must_have_coverage: 0.95, title_adjacency: 0.95, domain_fit: 0.9, seniority_gap: 0, location_fit: 1, reason: 'Direct title match' },
+      { id: 'c1', must_have_coverage: 0.75, title_adjacency: 0.8, domain_fit: 0.6, seniority_gap: 0, location_fit: 1, reason: 'Strong SaaS overlap' },
+      { id: 'c2', must_have_coverage: 0.5, title_adjacency: 0.3, domain_fit: 0.5, seniority_gap: 1, location_fit: 1, reason: 'Role below level' } ] };
+    const realFetch = window.fetch;
+    window.fetch = async (url, opts) => {
+      const u = String(url);
+      if (/anthropic|googleapis|openai|x\.ai|openrouter|groq|nvidia/.test(u)) {
+        window.lastAICall = { url: u, headers: opts.headers, body: JSON.parse(opts.body) };
+        const b = window.lastAICall.body;
+        const sys = b.system || b.system_instruction?.parts?.[0]?.text || b.messages?.[0]?.content || '';
+        const text = JSON.stringify(sys.includes('INTERVIEW for each job') ? SCAN : PKG);
+        const shape = u.includes('anthropic') ? { content: [{ type: 'text', text }], stop_reason: 'end_turn' }
+          : u.includes('googleapis') ? { candidates: [{ content: { parts: [{ text }] }, finishReason: 'STOP' }] }
+          : { choices: [{ message: { content: text }, finish_reason: 'stop' }] };
+        return new Response(JSON.stringify(shape));
+      }
+      return realFetch(url, opts);
+    };
+  </script>
+  <script type="module" src="../sidepanel.js"></script>
+</body>
+</html>

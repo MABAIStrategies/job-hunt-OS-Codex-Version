@@ -3,6 +3,11 @@ name: Validate
 on:
   push:
   pull_request:
+  # Re-run every 4 hours so new npm advisories or drift surface without a push.
+  # GitHub runs scheduled workflows on the default branch only.
+  schedule:
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
 
 jobs:
   repository:
