@@ -28,16 +28,25 @@ vercel --prod
 
 Use the generated `*.vercel.app` URL unless MAB AI Strategies later chooses a custom domain.
 
-## Optional Single-User Auth Gate
+## Single-User Auth Gate
 
-The deployed app can require browser HTTP Basic Auth when both values are set in Vercel environment variables:
+The deployed app requires browser HTTP Basic Auth. Set both values in Vercel environment variables (Production, and Preview if previews should be reachable):
 
 ```bash
 JOB_HUNT_AUTH_EMAIL=
 JOB_HUNT_AUTH_PASSWORD=
 ```
 
-Do not commit actual values. The current production deployment has this gate enabled through encrypted Vercel environment variables. This gate is appropriate for the personal v1 only. Before customer or multi-user launch, replace it with Clerk, Neon Auth, Auth.js, or another managed account system with proper session handling, account recovery, auditability, and tenant isolation.
+Do not commit actual values. The current production deployment has this gate enabled through encrypted Vercel environment variables.
+
+How `proxy.ts` behaves:
+
+- **Production fails closed.** When `NODE_ENV` is `production` (every `next build` / `next start` and every Vercel deployment, Preview included) and either variable is missing or empty, every matched request gets `503 Service unavailable: authentication is not configured.` The app is never served unauthenticated because of a missing or partial config. Set both variables and redeploy to restore access.
+- **Local development stays open.** Under `npm run dev` with neither variable set, the gate is skipped so you can work locally. Set both in `.env.local` to test the login prompt.
+- **Constant-time comparison.** Submitted credentials are checked with a constant-time comparison: both sides are hashed to SHA-256 with Web Crypto and compared byte by byte without exiting early. Email and password are always both checked, so response timing doesn't show which field was wrong or how much of it matched.
+- Auth responses send `Cache-Control: no-store`.
+
+This gate is appropriate for the personal v1 only. Before customer or multi-user launch, replace it with Clerk, Neon Auth, Auth.js, or another managed account system with proper session handling, account recovery, auditability, and tenant isolation.
 
 ## Future Integrations
 
