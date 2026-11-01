@@ -8,7 +8,7 @@
     "build": "node node_modules/next/dist/bin/next build",
     "start": "node node_modules/next/dist/bin/next start",
     "test": "python3 -m pytest",
-    "validate": "python3 /Users/mark/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/job-hunt-os && python3 -m pytest && npm run build"
+    "validate": "python3 scripts/validate_skill.py skills/job-hunt-os && python3 -m pytest && npm run build"
   },
   "dependencies": {
     "lucide-react": "1.25.0",
