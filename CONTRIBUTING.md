@@ -14,6 +14,5 @@ This is a proprietary MAB AI Strategies repository. Contributions are limited to
 
 ```bash
 python3 -m pytest tests/test_repository_artifacts.py -q
-python3 /Users/mark/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
-  "/Users/mark/Documents/Job Hunt OS: Codex Version/skills/job-hunt-os"
+python3 scripts/validate_skill.py skills/job-hunt-os
 ```

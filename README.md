@@ -67,8 +67,7 @@ npm run build
 Validate the Codex skill package:
 
 ```bash
-python3 /Users/mark/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
-  "/Users/mark/Documents/Job Hunt OS: Codex Version/skills/job-hunt-os"
+python3 scripts/validate_skill.py skills/job-hunt-os
 ```
 
 Run migration hygiene search:

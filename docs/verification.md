@@ -6,8 +6,7 @@
 python3 -m pip install -r requirements-dev.txt
 npm install
 python3 -m pytest tests/test_repository_artifacts.py -q
-python3 /Users/mark/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
-  "/Users/mark/Documents/Job Hunt OS: Codex Version/skills/job-hunt-os"
+python3 scripts/validate_skill.py skills/job-hunt-os
 npm audit --audit-level=moderate
 npm run build
 for f in skills/job-hunt-os/schemas/*.json examples/*.json launch/export-manifest.json; do
